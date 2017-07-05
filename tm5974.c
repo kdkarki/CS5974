@@ -47,7 +47,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=20000.0;
+	real te=200.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -221,28 +221,18 @@ int main()
 		}
 	}
 	myReport(serviceProviderArray);
-	
-	/*int r;
-	for(r = 0; r < N_SR; r++)
-	{
-		printf("\nCId: %d \t Is malicious: %d\n", r, customerArray[r].isMalicious);
-		int sp;
-		for(sp = 0; sp < N_SP; sp++)
-		{
-			printf("\t %d", customerArray[r].visitsPerSP[sp]);
-		}
-	} */
 }
 
 void myReport(struct ServiceProvider SPArray[N_SP])
 {
+	printf("\nSimulation Report\n");
     printf("#  \t F_ID \t Visitors\t Mal\t In Service\t In Queue\t Busy Period\t Current Wait Time\n");
     int i;
     for(i = 0; i < N_SP; i++)
     {
-        printf("SP%d \t %d \t %d \t %d \t %f \t %f \t %f \t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), B(SPArray[i].id), SPArray[i].actualWaitTime);
+        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %f \t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), B(SPArray[i].id), SPArray[i].actualWaitTime);
     }
-    report();
+    //report();
 }
 
 real getSPAdvertisedWaitTime(struct ServiceProvider* SP)
@@ -251,7 +241,7 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP)
 	real multiplier;
 
 	if(SP->isMalicious == 1)
-	{
+	{		
 		//first get current queue length
 		int currentQueueLength = inq(SP->id);
 		if(currentQueueLength > 20)
@@ -261,7 +251,7 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP)
 		else
 		{
 			multiplier = 0.75;
-		}	
+		}
 	}
 	else
 	{
@@ -282,14 +272,13 @@ struct ServiceProvider getLeastBusySP(struct ServiceProvider SPs[N_SP])
     {
         real currentSPAvailabilityTime = getSPAdvertisedWaitTime(&SPs[s]); 
         
-        if(currentSPAvailabilityTime < leastAvailabilityTime || (currentSPAvailabilityTime == leastAvailabilityTime && selectedSPVisitors > SPs[s].numberOfSRVisitors))
+        if(currentSPAvailabilityTime < leastAvailabilityTime)// || (currentSPAvailabilityTime == leastAvailabilityTime && selectedSPVisitors > SPs[s].numberOfSRVisitors))
         {
             selectedSP = SPs[s];
             leastAvailabilityTime = currentSPAvailabilityTime;
             selectedSPVisitors = SPs[s].numberOfSRVisitors;
         }
-    } 
-
+    }
     return selectedSP;
 }
 
@@ -316,9 +305,9 @@ void addNewSRToQueue(struct ServiceProvider *SP, struct ServiceRequester SR)
 	real currentTime = time();
 
 	//next find the index of the slot with the lowest time
-	int timeSlotLength = sizeof((*SP).availabilitySlotList)/sizeof(real);
+	int timeSlotLength = sizeof(SP->availabilitySlotList)/sizeof(real);
 	int leastTimeSlotIndex = 0; 
-	real leastTimeSlot = (*SP).availabilitySlotList[0]; 
+	real leastTimeSlot = SP->availabilitySlotList[0]; 
 	int sl;
 	for(sl = 1; sl < timeSlotLength; sl++)
 	{
@@ -349,11 +338,11 @@ void addNewSRToQueue(struct ServiceProvider *SP, struct ServiceRequester SR)
 	}
 
 	//finally update the waitTime of the SP by finding the least wait time in the availability slot list
-	int leastWaitTime;
+	real leastWaitTime;
 	leastWaitTime = SP->availabilitySlotList[0];
 	for(sl = 1; sl < timeSlotLength; sl++)
 	{
-		if((*SP).availabilitySlotList[sl] < leastWaitTime)
+		if(SP->availabilitySlotList[sl] < leastWaitTime)
 		{
 			leastWaitTime = SP->availabilitySlotList[sl];
 		}
