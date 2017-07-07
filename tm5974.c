@@ -7,11 +7,12 @@
 #define M_SP	20
 #define Ta	10.0
 #define Ts	1.0
-#define Th  0.25
+#define Th  0.2499 //threshold for wait time to be considered inaccurate
+#define M_Offset	0.75
 
 void myReport();
 real getSPAdvertisedWaitTime();
-struct ServiceProvider getLeastBusySP();
+struct ServiceProvider* getLeastBusySP();
 void addNewSRToQueue();
 void removeSRFromQueue();
 void addSRToSPServiceArray();
@@ -142,12 +143,12 @@ int main()
 			if (customerArray[customer].currentSPId == NON_EXISTENT) // the customer has just arrived and has not selected a SP for service
 			{				
 				real currentTime = time();
-				struct ServiceProvider selectedSP = getLeastBusySP(serviceProviderArray, currentTime);  
-				customerArray[customer].currentSPId = selectedSP.id;
+				struct ServiceProvider* selectedSP = getLeastBusySP(serviceProviderArray, currentTime);  
+				customerArray[customer].currentSPId = selectedSP->id;
 				//capture the clock time when this customer was assigned a SP
 				customerArray[customer].currentSPQueueStartTime = time();
 				customerArray[customer].currentServiceTime = expntl(Ts);
-				customerArray[customer].currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(&selectedSP, currentTime);
+				customerArray[customer].currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(selectedSP, currentTime);
 				//selectedSP.numberOfSRVisited++;
 				int x;
 				for(x = 0; x < N_SP; x++)
@@ -224,7 +225,7 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 
 	if(SP->isMalicious == 1)
 	{	
-		multiplier = 0.75;
+		multiplier = M_Offset;
 	}
 	else
 	{
@@ -243,10 +244,10 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 	return advertisedWaitTime;
 }
 
-struct ServiceProvider getLeastBusySP(struct ServiceProvider SPs[N_SP], real currentTime)
+struct ServiceProvider* getLeastBusySP(struct ServiceProvider SPs[N_SP], real currentTime)
 {
 	int s;
-    struct ServiceProvider selectedSP = SPs[0];
+    struct ServiceProvider* selectedSP = &SPs[0];
     real leastWaitTime = getSPAdvertisedWaitTime(&SPs[0], currentTime);//current customers in queue
     //real leastWaitTime = leastAvailabilityTime - currentTime;
     
@@ -258,7 +259,7 @@ struct ServiceProvider getLeastBusySP(struct ServiceProvider SPs[N_SP], real cur
         //real currentSPLeastWaitTime = currentSPAvailabilityTime - currentTime;
         if(currentSPLeastWaitTime < leastWaitTime)// || (currentSPLeastWaitTime == leastWaitTime && selectedSPVisitors > SPs[s].numberOfSRVisitors))
         {
-            selectedSP = SPs[s];
+            selectedSP = &SPs[s];
             //leastAvailabilityTime = currentSPAvailabilityTime;
             leastWaitTime = currentSPLeastWaitTime;
             selectedSPVisitors = SPs[s].numberOfSRVisitors;
