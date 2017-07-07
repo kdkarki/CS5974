@@ -149,19 +149,18 @@ int main()
 				customerArray[customer].currentSPQueueStartTime = time();
 				customerArray[customer].currentServiceTime = expntl(Ts);
 				customerArray[customer].currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(selectedSP, currentTime);
-				//selectedSP.numberOfSRVisited++;
+				
+				selectedSP->numberOfSRVisitors++;
+				//update the currentSRInQueue for this SP
+				addNewSRToQueue(selectedSP, customerArray[customer]);
 				int x;
 				for(x = 0; x < N_SP; x++)
 				{
 					if(serviceProviderArray[x].id == customerArray[customer].currentSPId)
 					{
-						serviceProviderArray[x].numberOfSRVisitors++;
 						customerArray[customer].visitsPerSP[x]++;
-						//update the currentSRInQueue for this SP
-						addNewSRToQueue(&serviceProviderArray[x], customerArray[customer]);
-						break;
 					}
-				}
+				}				
 			}
 			if (request(customerArray[customer].currentSPId,customer,0)==0) then
 			{
