@@ -7,7 +7,7 @@
 #define M_SP	20
 #define Ta	10.0
 #define Ts	1.0
-#define Th  0.20
+#define Th  0.25
 
 void myReport();
 real getSPAdvertisedWaitTime();
@@ -53,7 +53,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=200.0;
+	real te=2000.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -135,19 +135,19 @@ int main()
 			schedule(2,0.0,customer);
 			break;
 
-			case 2:  /* request server */
+			case 2:  /* request server */			
 			// If the customer has selected a SP and was waiting in the queue and now it is rescheduled by smpl to event 2, 
 			// then request service using the original SP fd ID which is stored in sp_id[customer];
 			// otherwise, the customer has just arrived and has not yet selected a SP for service
 			if (customerArray[customer].currentSPId == NON_EXISTENT) // the customer has just arrived and has not selected a SP for service
-			{
+			{				
 				real currentTime = time();
 				struct ServiceProvider selectedSP = getLeastBusySP(serviceProviderArray, currentTime);  
 				customerArray[customer].currentSPId = selectedSP.id;
 				//capture the clock time when this customer was assigned a SP
 				customerArray[customer].currentSPQueueStartTime = time();
 				customerArray[customer].currentServiceTime = expntl(Ts);
-				customerArray[customer].currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(selectedSP);
+				customerArray[customer].currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(&selectedSP, currentTime);
 				//selectedSP.numberOfSRVisited++;
 				int x;
 				for(x = 0; x < N_SP; x++)
@@ -232,6 +232,10 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 	}
 	real advertisedWaitTime;
 	advertisedWaitTime = multiplier * (SP->nextAvailTimeSlot - currentTime);
+	if(advertisedWaitTime > 0.0)
+	{
+		//printf("Advertised wait time greater than 0.00. SP%d, wait time: %f\n", SP->id, advertisedWaitTime);
+	}
 	if(advertisedWaitTime < 0)
 	{
 		advertisedWaitTime = 0.0;
@@ -399,5 +403,5 @@ void updateFeedback(struct ServiceRequester* SR, struct ServiceProvider* SPArray
 	{
 		SP->negativeFeedback++;
 	}
-
+				
 }
