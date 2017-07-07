@@ -7,7 +7,7 @@
 #define M_SP	20
 #define Ta	10.0
 #define Ts	1.0
-#define Th  0.2499 //threshold for wait time to be considered inaccurate
+#define Th  0.25 //threshold for wait time to be considered inaccurate
 #define M_Offset	0.75
 
 void myReport();
@@ -244,7 +244,7 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 	return advertisedWaitTime;
 }
 
-struct ServiceProvider* getLeastBusySP(struct ServiceProvider SPs[N_SP], real currentTime)
+struct ServiceProvider* getLeastBusySP(struct ServiceProvider* SPs, real currentTime)
 {
 	int s;
     struct ServiceProvider* selectedSP = &SPs[0];
