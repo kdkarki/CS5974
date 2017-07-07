@@ -32,7 +32,7 @@ struct ServiceProvider
 struct ServiceRequester
 {
 	int id;
-	real startTime;
+	real startTime;//simulation clock time when the customer was first added to the system
 	int currentSPId;
 	real currentServiceTime; //the exponential service time length this SR will use the SP for
 	real currentSPServiceStartTime; //simulation clock time when the SR received service from SR
@@ -76,21 +76,9 @@ int main()
         }
         
         
-		int sr;
-		/*
-		for(sr = 0; sr < M_SP; sr++)
-		{
-			serviceProviderArray[i].currentSRInService[sr] = NON_EXISTENT;                 
-		}
-		//initialize currentSRInQueue array
-		int srInQ = sizeof(serviceProviderArray[i].currentSRInQueue)/sizeof(int);
-		for(sr = 0; sr < srInQ; sr++)
-		{
-			serviceProviderArray[i].currentSRInQueue[sr] = NON_EXISTENT;	
-		}
-		*/
+		int sr, avlSL;
 		//initialize availabilitySlotList
-		int avlSL = sizeof(serviceProviderArray[i].availabilitySlotList)/sizeof(real);
+		avlSL = sizeof(serviceProviderArray[i].availabilitySlotList)/sizeof(real);
 		for(sr = 0; sr < avlSL; sr++)
 		{
 			serviceProviderArray[i].availabilitySlotList[sr] = 0.0;	
@@ -99,9 +87,7 @@ int main()
 
 	for(j = 0; j < N_SR; j++)
 	{
-                //ts[j] = expntl(Ta);
-		//schedule(1, ts[j], j);		
-		customerArray[j].startTime = expntl(Ta);
+        customerArray[j].startTime = expntl(Ta);
 		schedule(1, customerArray[j].startTime, j);
 		//printf("Scheduled arrival time of customer %d at %f\n", j, ts[j]);
  		customerArray[j].id = j;
@@ -142,8 +128,6 @@ int main()
 			// otherwise, the customer has just arrived and has not yet selected a SP for service
 			if (customerArray[customer].currentSPId == NON_EXISTENT) // the customer has just arrived and has not selected a SP for service
 			{
-				// if (++server >= N_SP) server=0; //rotating SP for now; later on it needs to be replaced by trust-based SP selection
-				//sp_id[customer] = serviceProviderArray[server];
 				real currentTime = time();
 				struct ServiceProvider selectedSP = getLeastBusySP(serviceProviderArray, currentTime);  
 				customerArray[customer].currentSPId = selectedSP.id;
@@ -171,7 +155,7 @@ int main()
 				customerArray[customer].currentSPServiceStartTime = time();
 				//printf("customer %d obtains service from SP with fd=%d; wait time is %f\n", customer, sp_id[customer], time()-ts[customer]);
 				
-
+				//TODO: updateFeedback()
 
 				schedule(3,customerArray[customer].currentServiceTime,customer);
 			}
@@ -179,29 +163,13 @@ int main()
 			case 3:  /* release server */
 			release(customerArray[customer].currentSPId,customer);
 			//printf("departure time of customer %d from SP with fd=%d is %f; total response time is %f\n", customer, sp_id[customer], time(), time()-ts[customer]);
-			/*
-			int s;
-			for(s = 0; s < N_SP; s++)
-			{
-				if(serviceProviderArray[s].id == customerArray[customer].currentSPId)
-				{
-					int csr;
-					for(csr = 0; csr < M_SP; csr++)
-					{
-						if(serviceProviderArray[s].currentSRInService[csr] == customer)
-						{
-							serviceProviderArray[s].currentSRInService[csr] = NON_EXISTENT;	
-							break;
-						}	
-					}	
-				}	
-			}
-			*/
+			
+			//TODO: remove the current SR from SP.currentSRInService array
+
 			customerArray[customer].currentSPId = NON_EXISTENT; // reset so that next time we know this customer will arrive anew
 			customerArray[customer].currentSPServiceStartTime = 0.0; 
 			customerArray[customer].currentSPQueueStartTime = 0.0;
 			customerArray[customer].currentSPAdvertisedWaitTime = 0.0;
-			//TODO: Recalculate the wait time of the SP just released.
 			
 			schedule(1,expntl(Ta), customer); /* schedule next arrival time */
 			break;
@@ -224,23 +192,10 @@ void myReport(struct ServiceProvider SPArray[N_SP])
 
 real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 {
-	//return SP->nextAvailTimeSlot;
 	real multiplier;
 
 	if(SP->isMalicious == 1)
 	{	
-		/*	
-		//first get current queue length
-		int currentQueueLength = inq(SP->id);
-		if(currentQueueLength > 20)
-		{
-			multiplier = 1.0;
-		}
-		else
-		{
-			multiplier = 0.75;
-		}
-		*/
 		multiplier = 0.75;
 	}
 	else
@@ -277,50 +232,11 @@ struct ServiceProvider getLeastBusySP(struct ServiceProvider SPs[N_SP], real cur
             selectedSPVisitors = SPs[s].numberOfSRVisitors;
         }
     }
-    /*
-    if(inq(selectedSP.id) > 20)
-    {
-    	char str[16];
-    	printf("SP with queue more than 20: %d, current time: %f\n", selectedSP.id, currentTime);
-    	for(s = 0; s < N_SP; s++)
-    	{
-    		real currentSPWaitTime = SPs[s].nextAvailTimeSlot - currentTime;
-    		real advertisedWaitTime = getSPAdvertisedWaitTime(&SPs[s], currentTime);
-        	printf("\tSP%d ID: %d\tNext Availability: %f\tActual Wait Time: %f\tAdvertised Wait Time: %f\n",s,SPs[s].id, SPs[s].nextAvailTimeSlot, currentSPWaitTime, advertisedWaitTime);
-        	if(inq(SPs[s].id) > 20)
-        	{
-        		int x;
-        		for(x = 0; x < M_SP; x++)
-        		{
-        			printf("\t\t #%d\tTime:%f\n", x, SPs[s].availabilitySlotList[x]);
-        		}
-        	}
-    	} 
-    	scanf("%s", str);
-    }
-    */
     return selectedSP;
 }
 
 void addNewSRToQueue(struct ServiceProvider *SP, struct ServiceRequester SR)
 {
-	//first add SR to the bottom of currentSRInQueue
-	/*
-	int srQIndx, srQLength;
-	srQLength = sizeof(SP->currentSRInQueue)/sizeof(int);
-	for(srQIndx = 0; srQIndx < srQLength; srQIndx++)
-	{
-		if(SP->currentSRInQueue[srQIndx] == NON_EXISTENT)
-		{
-			SP->currentSRInQueue[srQIndx] = SR.id;	
-			if(srQIndx > 55)
-			{
-				//printf("SPID: %d, SRID: %d, \n\tSP Queue %d value: %d\n", SP->id, SR.id, srQIndx, SP->currentSRInQueue[srQIndx]);
-			}
-			break;
-		}
-	}
-	*/
 	//capture current time
 	real currentTime = time();
 
@@ -331,15 +247,6 @@ void addNewSRToQueue(struct ServiceProvider *SP, struct ServiceRequester SR)
 	int sl;
 	for(sl = 1; sl < timeSlotLength; sl++)
 	{
-		/*if(((*SP).availabilitySlotList[sl] == NON_EXISTENT || (*SP).availabilitySlotList[sl] < currentTime) && (*SP).availabilitySlotList[sl] < leastTimeSlot)
-		{
-			leastTimeSlotIndex = sl;	
-			if((*SP).availabilitySlotList[sl] == NON_EXISTENT || (*SP).availabilitySlotList[sl] < currentTime)
-			{
-				leastTimeSlot = 0.0;	
-			}
-		}
-		*/ 
 		if(SP->availabilitySlotList[sl] < leastTimeSlot)
 		{
 			leastTimeSlotIndex = sl;
@@ -375,48 +282,3 @@ void addNewSRToQueue(struct ServiceProvider *SP, struct ServiceRequester SR)
 
 	SP->nextAvailTimeSlot = leastWaitTime; //This is the time when the next slot will be available
 }
-
-/*void removeSRFromQueue(struct ServiceProvider *SP, struct ServiceRequester SR)
-{
-	//An SR is removed from the queue list when its request for SP is successful
-	//The SR to removed from the queue should the first in the queue but if it is not then log the error
-	if(SP->currentSRInQueue[0] != SR.id)
-	{
-		//printf("The first element in the queue is not the SR that just got server request. First SR in queue: %d, SR to be removed: %d, SP Id: %d\n", (*SP).currentSRInQueue[0], SR.id, (*SP).id);
-		int qIndx, qLength;
-		qLength = sizeof(SP->currentSRInQueue)/sizeof(int);
-		for(qIndx = 0; qIndx < qLength; qIndx++)
-		{
-			//printf("\tQueue index: %d, value: %d\n", qIndx, SP->currentSRInQueue[qIndx]);
-			if((*SP).currentSRInQueue[qIndx] == SR.id)
-			{
-				printf("\tThe id was found at index %d\n", qIndx);
-				int i;
-				for(i = qIndx; i < qLength; i++)
-				{
-					if((*SP).currentSRInQueue[i] == NON_EXISTENT)
-					{
-						break;
-					}
-					SP->currentSRInQueue[i] = SP->currentSRInQueue[i+1];
-				}
-				break;
-			}
-		}
-	}
-	else if(SP->currentSRInQueue[0] == SR.id)
-	{
-		//move all the valid content of the queue one index up
-		int qIndx, qLength;
-		qLength = sizeof(SP->currentSRInQueue)/sizeof(int);
-		for(qIndx = 0; qIndx < qLength; qIndx++)
-		{
-			SP->currentSRInQueue[qIndx] = SP->currentSRInQueue[qIndx + 1];
-			if(SP->currentSRInQueue[qIndx + 1] == NON_EXISTENT)
-			{
-				break;	
-			}
-		}
-	}
-}
-*/
