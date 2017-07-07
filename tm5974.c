@@ -7,6 +7,7 @@
 #define M_SP	20
 #define Ta	10.0
 #define Ts	1.0
+#define Th  0.20
 
 void myReport();
 real getSPAdvertisedWaitTime();
@@ -15,7 +16,7 @@ void addNewSRToQueue();
 void removeSRFromQueue();
 void addSRToSPServiceArray();
 void removeSRFromSPServiceArray();
-void updatedFeedback();
+void updateFeedback();
 
 #define NON_EXISTENT -1
 
@@ -29,6 +30,8 @@ struct ServiceProvider
 	int currentSRInService[M_SP];//SRs being serviced by the SP
 	//int currentSRInQueue[M_SP];
 	real availabilitySlotList[M_SP];//this is used to calculate the next available time
+	int positiveFeedback;
+	int negativeFeedback;
 };
 
 struct ServiceRequester
@@ -70,6 +73,8 @@ int main()
         serviceProviderArray[i].trustScore = 0.0;
         serviceProviderArray[i].nextAvailTimeSlot = 0.0;
         serviceProviderArray[i].isMalicious = 0;
+        serviceProviderArray[i].positiveFeedback = 0;
+        serviceProviderArray[i].negativeFeedback = 0;
               
         
         if(i == 3 || i == 6)
@@ -165,7 +170,9 @@ int main()
 				
 				//add this SR to the SP.currentSRInService array
 				addSRToSPServiceArray(&customerArray[customer], serviceProviderArray);
-				//TODO: updateFeedback()
+
+				//update the feedback to SP and SR based on the wait time
+				updateFeedback(&customerArray[customer], serviceProviderArray, customerArray);
 
 				schedule(3,customerArray[customer].currentServiceTime,customer);
 			}
@@ -192,14 +199,14 @@ int main()
 void myReport(struct ServiceProvider SPArray[N_SP])
 {
 	printf("\nSimulation Report\n");
-    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t In Queue\t Busy Period\t Current Wait Time\n");
+    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t In Queue\t Busy Period\t Current Wait Time \t + Feedback \t - Feedback\n");
     int i;
     for(i = 0; i < N_SP; i++)
     {
-        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %f \t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot);
+        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t     %d \t     %d\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, SPArray[i].positiveFeedback, SPArray[i].negativeFeedback);
     }
     //report();
-    for(i = 0; i < N_SP; i++)
+    /*for(i = 0; i < N_SP; i++)
     {
     	printf("\nCurrent SR in Service for SP%d\n\t", i);
     	int sr;
@@ -208,6 +215,7 @@ void myReport(struct ServiceProvider SPArray[N_SP])
     		printf("%d\t", SPArray[i].currentSRInService[sr]);
     	}
     }
+    */
 }
 
 real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
@@ -349,4 +357,47 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 			break;
 		}
 	}
+}
+
+void updateFeedback(struct ServiceRequester* SR, struct ServiceProvider* SPArray, struct ServiceRequester* SRArray)
+{
+	int spIndx, feedbackSP, feedbackSR;
+	struct ServiceProvider* SP;
+
+	//determine the acutal wait time by subtracting the clock time when the SR was in queue from when SR received service
+	real currentSRActualWaitTime = SR->currentSPServiceStartTime - SR->currentSPQueueStartTime;
+
+	//determine the difference between the actual wait time and advertised wait time
+	real waitTimeDiff = currentSRActualWaitTime - SR->currentSPAdvertisedWaitTime;
+
+	//determine the perentage of difference
+	real diffPercentage = waitTimeDiff / currentSRActualWaitTime;
+
+	if(diffPercentage > Th)
+	{
+		feedbackSP = -1;
+	}
+	else
+	{
+		feedbackSP = 1;
+	}
+	
+	for(spIndx = 0; spIndx < N_SP; spIndx++)
+	{
+		if(SR->currentSPId == SPArray[spIndx].id)
+		{
+			SP = &SPArray[spIndx];
+			break;
+		}
+	}
+
+	if(feedbackSP == 1)
+	{
+		SP->positiveFeedback++;
+	}
+	else
+	{
+		SP->negativeFeedback++;
+	}
+
 }
