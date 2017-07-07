@@ -159,6 +159,7 @@ int main()
 					if(serviceProviderArray[x].id == customerArray[customer].currentSPId)
 					{
 						customerArray[customer].visitsPerSP[x]++;
+						break;
 					}
 				}				
 			}
