@@ -28,7 +28,7 @@ struct ServiceRequester
 	real currentServiceTime; //the exponential service time length this SR will use the SP for
 	real currentSPServiceStartTime; //simulation clock time when the SR received service from SR
 	real currentSPQueueStartTime; //simulation clock time when the SR was selected to request a server
-	real currentSPAdvertisedWaitTime; //the length of time advertised by SP
+	real currentSPExperiencedWaitTime; //the length of time advertised by SP
 	int visitsPerSP[N_SP];
 	int isMalicious;
 	int positiveFeedback;
@@ -40,7 +40,7 @@ struct SRFeedback
 	struct ServiceRequester* sRequester;
 	int positiveFeedback;
 	int negativeFeedback;
-}
+};
 
 struct ServiceProvider
 {
@@ -117,7 +117,7 @@ int main()
 		customerArray[j].currentServiceTime = 0.0;
 		customerArray[j].currentSPServiceStartTime = 0.0;
 		customerArray[j].currentSPQueueStartTime = 0.0;
-		customerArray[j].currentSPAdvertisedWaitTime = 0.0;
+		customerArray[j].currentSPExperiencedWaitTime = 0.0;
 		int s;
 		for(s = 0; s < N_SP; s++)
 		{
@@ -156,7 +156,7 @@ int main()
 				//capture the clock time when this customer was assigned a SP
 				customerArray[customer].currentSPQueueStartTime = time();
 				customerArray[customer].currentServiceTime = expntl(Ts);
-				customerArray[customer].currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(selectedSP, currentTime);
+				//customerArray[customer].currentSPExperiencedWaitTime = getSPAdvertisedWaitTime(selectedSP, currentTime);
 				
 				selectedSP->numberOfSRVisitors++;
 				//update the currentSRInQueue for this SP
@@ -196,7 +196,7 @@ int main()
 			customerArray[customer].currentSP = NON_EXISTENT; // reset so that next time we know this customer will arrive anew
 			customerArray[customer].currentSPServiceStartTime = 0.0; 
 			customerArray[customer].currentSPQueueStartTime = 0.0;
-			customerArray[customer].currentSPAdvertisedWaitTime = 0.0;
+			customerArray[customer].currentSPExperiencedWaitTime = 0.0;
 			
 			schedule(1,expntl(Ta), customer); /* schedule next arrival time */
 			break;
@@ -430,6 +430,6 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 		multiplier = 1.0;
 	}
 
-	SR->currentSPAdvertisedWaitTime = multiplier * currentSPAdvertisedWaitTime;
+	SR->currentSPExperiencedWaitTime = multiplier * currentSPAdvertisedWaitTime;
 				
 }
