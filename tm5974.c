@@ -8,7 +8,7 @@
 #define Ta	10.0
 #define Ts	1.0
 #define T_Margin	0.25 //threshold for wait time to be considered inaccurate
-#define WaitTime_Offset	0.74 //the wait time offset reported by a malicious SP
+#define WaitTime_Offset	0.75 //the wait time offset reported by a malicious SP
 #define NON_EXISTENT -1
 
 void myReport();
@@ -31,7 +31,16 @@ struct ServiceRequester
 	real currentSPAdvertisedWaitTime; //the length of time advertised by SP
 	int visitsPerSP[N_SP];
 	int isMalicious;
+	int positiveFeedback;
+	int negativeFeedback;
 };
+
+struct SRFeedback
+{
+	struct ServiceRequester* sRequester;
+	int positiveFeedback;
+	int negativeFeedback;
+}
 
 struct ServiceProvider
 {
@@ -372,10 +381,10 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 	//determine the acutal wait time by subtracting the clock time when the SR was in queue from when SR received service
 	real currentSRActualWaitTime = SR->currentSPServiceStartTime - SR->currentSPQueueStartTime;
 
-	//real currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime();
+	real currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(SR->currentSP, time());
 
-	//determine the difference between the actual wait time and advertised wait time
-	real waitTimeDiff = currentSRActualWaitTime - SR->currentSPAdvertisedWaitTime;
+	//determine the difference between the actual wait time and current advertised wait time
+	real waitTimeDiff = currentSRActualWaitTime - currentSPAdvertisedWaitTime;
 
 	//determine the perentage of difference
 	real diffPercentage = waitTimeDiff / currentSRActualWaitTime;
@@ -406,5 +415,21 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 	{
 		SP->negativeFeedback++;
 	}
+
+	//also update the actual wait time observed by the current SR so that it can act as witness
+	//A malicious SR will advertise incorrect wait time for non-malicious SP and will advertise 
+	//the same wait time as SP for malicious SP
+
+	real multiplier;
+	if(SR->isMalicious == 1)
+	{
+		multiplier = 1.0 + (1.0 - WaitTime_Offset);
+	}
+	else
+	{
+		multiplier = 1.0;
+	}
+
+	SR->currentSPAdvertisedWaitTime = multiplier * currentSPAdvertisedWaitTime;
 				
 }
