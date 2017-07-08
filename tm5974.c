@@ -61,7 +61,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=200.0;
+	real te=20000.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -229,6 +229,8 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     	}
         printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t     %d \t     %d\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, posFB, negFB);
     }
+    char str[8];
+    scanf("%s", str);
     //report();
     /*for(i = 0; i < N_SP; i++)
     {
@@ -242,9 +244,14 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     */
     printf("\n\n");
     int cIndx;
+    printf("CId \t + Feedback\t- Feedback\n");
     for(cIndx = 0; cIndx < N_SR; cIndx++)
     {
-    	printf("Customer ID: %d\t %d\t%d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback);
+    	printf("%d\t\t %d\t\t%d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback);
+    	if(cIndx == 500)
+    	{
+    		scanf("%s", str);
+    	}
     }
 }
 
@@ -478,7 +485,7 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 	//the same wait time as SP for malicious SP
 
 	real multiplier;
-	if(SR->isMalicious == 1)
+	if(SR->isMalicious == 1 && !SP->isMalicious)
 	{
 		multiplier = 1.0 + (1.0 - WaitTime_Offset);
 	}
