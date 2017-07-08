@@ -209,10 +209,10 @@ int main()
 			break;
 		}
 	}
-	myReport(serviceProviderArray);
+	myReport(serviceProviderArray, customerArray);
 }
 
-void myReport(struct ServiceProvider SPArray[N_SP])
+void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray)
 {
 	printf("\nSimulation Report\n");
     printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t In Queue\t Busy Period\t Current Wait Time \t + Feedback \t - Feedback\n");
@@ -240,6 +240,12 @@ void myReport(struct ServiceProvider SPArray[N_SP])
     	}
     }
     */
+    printf("\n\n");
+    int cIndx;
+    for(cIndx = 0; cIndx < N_SR; cIndx++)
+    {
+    	printf("Customer ID: %d\t %d\t%d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback);
+    }
 }
 
 real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
@@ -422,29 +428,6 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 		}
 	}
 
-	/*for(fdIndx = 0; fdIndx < N_SR; fdIndx++)
-	{
-		if(SP->feedbacks[fdIndx].sRequester->id == SR->id)
-		{
-			if(SP->feedbacks[fdIndx].sRequester->id != fdIndx)
-			{
-				printf("ERROR **** SP->feedbacks[fdIndx].sRequester->id != fdIndx **** ERROR\n");
-			}
-			else
-			{
-				if(feedbackSP == 1)
-				{
-					SP->feedbacks[fdIndx]->positiveFeedback++;
-				}
-				else
-				{
-					SP->feedbacks[fdIndx].negativeFeedback++;
-				}
-			}
-			break;
-		}
-	}
-	*/
 	if(feedbackSP == 1)
 	{
 		SP->feedbacks[SR->id].positiveFeedback++;
@@ -452,6 +435,42 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 	else
 	{
 		SP->feedbacks[SR->id].negativeFeedback++;
+	}
+
+	//now provide feedback for each witness. Witness is an SR that is currently in service
+	for(fdIndx = 0; fdIndx < M_SP; fdIndx++)
+	{
+		//do NOT give feedback to ownself
+		if(SP->currentSRInService[fdIndx] != NON_EXISTENT && SP->currentSRInService[fdIndx]->id != SR->id)
+		{
+			if(SP->currentSRInService[fdIndx]->currentSP->id != SP->id)
+			{
+				printf("ERROR ***** SP->currentSRInService[fdIndx]->currentSP->id != SP->id ***** ERROR");
+			}
+			//determine the difference between the wait time experienced by current SR and the witness
+			real waitTimeDiffWithWitness = currentSRActualWaitTime - SP->currentSRInService[fdIndx]->currentSPExperiencedWaitTime;
+
+			//determine the perentage of difference
+			real wtDiffPercentage = waitTimeDiffWithWitness / currentSRActualWaitTime;
+
+			if(diffPercentage > T_Margin)
+			{
+				feedbackSR = -1;
+			}
+			else
+			{
+				feedbackSR = 1;
+			}
+
+			if(feedbackSR == 1)
+			{
+				SP->currentSRInService[fdIndx]->positiveFeedback++;
+			}
+			else
+			{
+				SP->currentSRInService[fdIndx]->negativeFeedback++;
+			}
+		}
 	}
 
 	//also update the actual wait time observed by the current SR so that it can act as witness
