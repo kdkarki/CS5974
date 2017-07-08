@@ -18,7 +18,7 @@ void addNewSRToQueue();
 void removeSRFromQueue();
 void addSRToSPServiceArray();
 void removeSRFromSPServiceArray();
-void updateFeedback();
+void updateFeedbackAndWaitTime();
 
 struct ServiceRequester
 {
@@ -53,7 +53,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=20000.0;
+	real te=2000.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -172,7 +172,7 @@ int main()
 				addSRToSPServiceArray(&customerArray[customer], serviceProviderArray);
 
 				//update the feedback to SP and SR based on the wait time
-				updateFeedback(&customerArray[customer], serviceProviderArray, customerArray);
+				updateFeedbackAndWaitTime(&customerArray[customer], serviceProviderArray, customerArray);
 
 				schedule(3,customerArray[customer].currentServiceTime,customer);
 			}
@@ -364,13 +364,15 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 	}
 }
 
-void updateFeedback(struct ServiceRequester* SR, struct ServiceProvider* SPArray, struct ServiceRequester* SRArray)
+void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvider* SPArray, struct ServiceRequester* SRArray)
 {
 	int spIndx, feedbackSP, feedbackSR;
 	struct ServiceProvider* SP;
 
 	//determine the acutal wait time by subtracting the clock time when the SR was in queue from when SR received service
 	real currentSRActualWaitTime = SR->currentSPServiceStartTime - SR->currentSPQueueStartTime;
+
+	//real currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime();
 
 	//determine the difference between the actual wait time and advertised wait time
 	real waitTimeDiff = currentSRActualWaitTime - SR->currentSPAdvertisedWaitTime;
