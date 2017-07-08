@@ -7,8 +7,9 @@
 #define M_SP	20
 #define Ta	10.0
 #define Ts	1.0
-#define Th  0.25 //threshold for wait time to be considered inaccurate
-#define M_Offset	0.75
+#define T_Margin	0.25 //threshold for wait time to be considered inaccurate
+#define WaitTime_Offset	0.74 //the wait time offset reported by a malicious SP
+#define NON_EXISTENT -1
 
 void myReport();
 real getSPAdvertisedWaitTime();
@@ -18,22 +19,6 @@ void removeSRFromQueue();
 void addSRToSPServiceArray();
 void removeSRFromSPServiceArray();
 void updateFeedback();
-
-#define NON_EXISTENT -1
-
-struct ServiceProvider
-{
-	int id;
-	int numberOfSRVisitors;
-	real trustScore;
-	real nextAvailTimeSlot;//simulation clock time when the SP is available to service a new customer
-	int isMalicious;
-	int currentSRInService[M_SP];//SRs being serviced by the SP
-	//int currentSRInQueue[M_SP];
-	real availabilitySlotList[M_SP];//this is used to calculate the next available time
-	int positiveFeedback;
-	int negativeFeedback;
-};
 
 struct ServiceRequester
 {
@@ -48,13 +33,27 @@ struct ServiceRequester
 	int isMalicious;
 };
 
+struct ServiceProvider
+{
+	int id;
+	int numberOfSRVisitors;
+	real trustScore;
+	real nextAvailTimeSlot;//simulation clock time when the SP is available to service a new customer
+	int isMalicious;
+	struct ServiceRequester* currentSRInService[M_SP];//SRs being serviced by the SP
+	//int currentSRInQueue[M_SP];
+	real availabilitySlotList[M_SP];//this is used to calculate the next available time
+	int positiveFeedback;
+	int negativeFeedback;
+};
+
 int main()
 {
 	struct ServiceProvider serviceProviderArray[N_SP];
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=2000.0;
+	real te=20000.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -213,7 +212,7 @@ void myReport(struct ServiceProvider SPArray[N_SP])
     	int sr;
     	for(sr = 0; sr < M_SP; sr++)
     	{
-    		printf("%d\t", SPArray[i].currentSRInService[sr]);
+    		printf("%d\t", SPArray[i].currentSRInService[sr]->id);
     	}
     }
     */
@@ -225,7 +224,7 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 
 	if(SP->isMalicious == 1)
 	{	
-		multiplier = M_Offset;
+		multiplier = WaitTime_Offset;
 	}
 	else
 	{
@@ -334,7 +333,8 @@ void addSRToSPServiceArray(struct ServiceRequester* SR, struct ServiceProvider* 
 	{
 		if(SP->currentSRInService[srInServIndx] == NON_EXISTENT)
 		{
-			SP->currentSRInService[srInServIndx] = SR->id;
+			//SP->currentSRInService[srInServIndx] = SR->id;
+			SP->currentSRInService[srInServIndx] = SR;
 			break;
 		}
 	}
@@ -356,7 +356,7 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 	int srInServIndx;
 	for(srInServIndx = 0; srInServIndx < M_SP; srInServIndx++)
 	{
-		if(SP->currentSRInService[srInServIndx] == SR->id)
+		if(SP->currentSRInService[srInServIndx] == SR)
 		{
 			SP->currentSRInService[srInServIndx] = NON_EXISTENT;
 			break;
@@ -378,7 +378,7 @@ void updateFeedback(struct ServiceRequester* SR, struct ServiceProvider* SPArray
 	//determine the perentage of difference
 	real diffPercentage = waitTimeDiff / currentSRActualWaitTime;
 
-	if(diffPercentage > Th)
+	if(diffPercentage > T_Margin)
 	{
 		feedbackSP = -1;
 	}
