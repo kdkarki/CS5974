@@ -24,7 +24,7 @@ struct ServiceRequester
 {
 	int id;
 	real startTime;//simulation clock time when the customer was first added to the system
-	int currentSPId;
+	struct ServiceProvider* currentSP;
 	real currentServiceTime; //the exponential service time length this SR will use the SP for
 	real currentSPServiceStartTime; //simulation clock time when the SR received service from SR
 	real currentSPQueueStartTime; //simulation clock time when the SR was selected to request a server
@@ -104,7 +104,7 @@ int main()
 		schedule(1, customerArray[j].startTime, j);
 		//printf("Scheduled arrival time of customer %d at %f\n", j, ts[j]);
  		customerArray[j].id = j;
-		customerArray[j].currentSPId = NON_EXISTENT;
+		customerArray[j].currentSP = NON_EXISTENT;
 		customerArray[j].currentServiceTime = 0.0;
 		customerArray[j].currentSPServiceStartTime = 0.0;
 		customerArray[j].currentSPQueueStartTime = 0.0;
@@ -139,11 +139,11 @@ int main()
 			// If the customer has selected a SP and was waiting in the queue and now it is rescheduled by smpl to event 2, 
 			// then request service using the original SP fd ID which is stored in sp_id[customer];
 			// otherwise, the customer has just arrived and has not yet selected a SP for service
-			if (customerArray[customer].currentSPId == NON_EXISTENT) // the customer has just arrived and has not selected a SP for service
+			if (customerArray[customer].currentSP == NON_EXISTENT) // the customer has just arrived and has not selected a SP for service
 			{				
 				real currentTime = time();
 				struct ServiceProvider* selectedSP = getLeastBusySP(serviceProviderArray, currentTime);  
-				customerArray[customer].currentSPId = selectedSP->id;
+				customerArray[customer].currentSP = selectedSP;
 				//capture the clock time when this customer was assigned a SP
 				customerArray[customer].currentSPQueueStartTime = time();
 				customerArray[customer].currentServiceTime = expntl(Ts);
@@ -155,14 +155,14 @@ int main()
 				int x;
 				for(x = 0; x < N_SP; x++)
 				{
-					if(serviceProviderArray[x].id == customerArray[customer].currentSPId)
+					if(serviceProviderArray[x].id == customerArray[customer].currentSP->id)
 					{
 						customerArray[customer].visitsPerSP[x]++;
 						break;
 					}
 				}				
 			}
-			if (request(customerArray[customer].currentSPId,customer,0)==0) then
+			if (request(customerArray[customer].currentSP->id,customer,0)==0) then
 			{
 				//capture the clock time when this customer received the service
 				customerArray[customer].currentSPServiceStartTime = time();
@@ -178,13 +178,13 @@ int main()
 			}
 			break;
 			case 3:  /* release server */
-			release(customerArray[customer].currentSPId,customer);
+			release(customerArray[customer].currentSP->id,customer);
 			//printf("departure time of customer %d from SP with fd=%d is %f; total response time is %f\n", customer, sp_id[customer], time(), time()-ts[customer]);
 			
 			//remove the current SR from SP.currentSRInService array
 			removeSRFromSPServiceArray(&customerArray[customer], serviceProviderArray);
 
-			customerArray[customer].currentSPId = NON_EXISTENT; // reset so that next time we know this customer will arrive anew
+			customerArray[customer].currentSP = NON_EXISTENT; // reset so that next time we know this customer will arrive anew
 			customerArray[customer].currentSPServiceStartTime = 0.0; 
 			customerArray[customer].currentSPQueueStartTime = 0.0;
 			customerArray[customer].currentSPAdvertisedWaitTime = 0.0;
@@ -321,7 +321,7 @@ void addSRToSPServiceArray(struct ServiceRequester* SR, struct ServiceProvider* 
 	int spIndx;
 	for(spIndx = 0; spIndx < N_SP; spIndx++)
 	{
-		if(SR->currentSPId == SPArray[spIndx].id)
+		if(SR->currentSP->id == SPArray[spIndx].id)
 		{
 			SP = &SPArray[spIndx];
 			break;
@@ -346,7 +346,7 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 	int spIndx;
 	for(spIndx = 0; spIndx < N_SP; spIndx++)
 	{
-		if(SR->currentSPId == SPArray[spIndx].id)
+		if(SR->currentSP->id == SPArray[spIndx].id)
 		{
 			SP = &SPArray[spIndx];
 			break;
@@ -391,7 +391,7 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 	
 	for(spIndx = 0; spIndx < N_SP; spIndx++)
 	{
-		if(SR->currentSPId == SPArray[spIndx].id)
+		if(SR->currentSP->id == SPArray[spIndx].id)
 		{
 			SP = &SPArray[spIndx];
 			break;
