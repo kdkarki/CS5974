@@ -24,7 +24,6 @@ struct ServiceRequester
 {
 	int id;
 	real startTime;//simulation clock time when the customer was first added to the system
-	struct ServiceProvider* currentSP;
 	real currentServiceTime; //the exponential service time length this SR will use the SP for
 	real currentSPServiceStartTime; //simulation clock time when the SR received service from SR
 	real currentSPQueueStartTime; //simulation clock time when the SR was selected to request a server
@@ -33,13 +32,14 @@ struct ServiceRequester
 	int isMalicious;
 	int positiveFeedback;
 	int negativeFeedback;
+	struct ServiceProvider* currentSP;
 };
 
 struct SRFeedback
 {
-	struct ServiceRequester* sRequester;
 	int positiveFeedback;
 	int negativeFeedback;
+	struct ServiceRequester* sRequester;
 };
 
 struct ServiceProvider
@@ -48,12 +48,11 @@ struct ServiceProvider
 	int numberOfSRVisitors;
 	real trustScore;
 	real nextAvailTimeSlot;//simulation clock time when the SP is available to service a new customer
-	int isMalicious;
-	struct ServiceRequester* currentSRInService[M_SP];//SRs being serviced by the SP
+	int isMalicious;	
 	//int currentSRInQueue[M_SP];
 	real availabilitySlotList[M_SP];//this is used to calculate the next available time
-	int positiveFeedback;
-	int negativeFeedback;
+	struct ServiceRequester* currentSRInService[M_SP];//SRs being serviced by the SP
+	struct SRFeedback feedbacks[N_SR];
 };
 
 int main()
@@ -62,7 +61,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=2000.0;
+	real te=200.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -82,8 +81,6 @@ int main()
         serviceProviderArray[i].trustScore = 0.0;
         serviceProviderArray[i].nextAvailTimeSlot = 0.0;
         serviceProviderArray[i].isMalicious = 0;
-        serviceProviderArray[i].positiveFeedback = 0;
-        serviceProviderArray[i].negativeFeedback = 0;
               
         
         if(i == 3 || i == 6)
@@ -130,6 +127,16 @@ int main()
 		else
 		{
 			customerArray[j].isMalicious = 0;
+		}
+
+		//initialize feedback for all the SPs
+		//Since sRequester is pointer to ServiceRequester, this has to be done here.
+		int spIndx;
+		for(spIndx = 0; spIndx < N_SP; spIndx++)
+		{
+			serviceProviderArray[spIndx].feedbacks[j].sRequester = &customerArray[j];
+			serviceProviderArray[spIndx].feedbacks[j].positiveFeedback = 0;//for beta reputation, the initial
+			serviceProviderArray[spIndx].feedbacks[j].negativeFeedback = 0;//rating should be 0.5 so both positive and negative feedback is 1 
 		}
 	}
 
@@ -212,7 +219,15 @@ void myReport(struct ServiceProvider SPArray[N_SP])
     int i;
     for(i = 0; i < N_SP; i++)
     {
-        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t     %d \t     %d\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, SPArray[i].positiveFeedback, SPArray[i].negativeFeedback);
+    	int fbIndx, posFB, negFB;
+    	posFB = 0;
+    	negFB = 0;
+    	for(fbIndx = 0; fbIndx < N_SR; fbIndx++)
+    	{
+    		posFB = posFB + SPArray[i].feedbacks[fbIndx].positiveFeedback;
+    		negFB = negFB + SPArray[i].feedbacks[fbIndx].negativeFeedback;
+    	}
+        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t     %d \t     %d\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, posFB, negFB);
     }
     //report();
     /*for(i = 0; i < N_SP; i++)
@@ -375,7 +390,7 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 
 void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvider* SPArray, struct ServiceRequester* SRArray)
 {
-	int spIndx, feedbackSP, feedbackSR;
+	int spIndx, fdIndx, feedbackSP, feedbackSR;
 	struct ServiceProvider* SP;
 
 	//determine the acutal wait time by subtracting the clock time when the SR was in queue from when SR received service
@@ -407,13 +422,36 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 		}
 	}
 
+	/*for(fdIndx = 0; fdIndx < N_SR; fdIndx++)
+	{
+		if(SP->feedbacks[fdIndx].sRequester->id == SR->id)
+		{
+			if(SP->feedbacks[fdIndx].sRequester->id != fdIndx)
+			{
+				printf("ERROR **** SP->feedbacks[fdIndx].sRequester->id != fdIndx **** ERROR\n");
+			}
+			else
+			{
+				if(feedbackSP == 1)
+				{
+					SP->feedbacks[fdIndx]->positiveFeedback++;
+				}
+				else
+				{
+					SP->feedbacks[fdIndx].negativeFeedback++;
+				}
+			}
+			break;
+		}
+	}
+	*/
 	if(feedbackSP == 1)
 	{
-		SP->positiveFeedback++;
+		SP->feedbacks[SR->id].positiveFeedback++;
 	}
 	else
 	{
-		SP->negativeFeedback++;
+		SP->feedbacks[SR->id].negativeFeedback++;
 	}
 
 	//also update the actual wait time observed by the current SR so that it can act as witness
