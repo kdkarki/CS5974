@@ -20,6 +20,12 @@ void addSRToSPServiceArray();
 void removeSRFromSPServiceArray();
 void updateFeedbackAndWaitTime();
 
+struct Witness
+{
+	real waitTimeLength;
+	struct ServiceRequester* sRequester;
+};
+
 struct ServiceRequester
 {
 	int id;
@@ -27,12 +33,14 @@ struct ServiceRequester
 	real currentServiceTime; //the exponential service time length this SR will use the SP for
 	real currentSPServiceStartTime; //simulation clock time when the SR received service from SR
 	real currentSPQueueStartTime; //simulation clock time when the SR was selected to request a server
-	real currentSPExperiencedWaitTime; //the length of time advertised by SP
+	real currentSPAdvertisedWaitTime; //the length of time to wait before getting service as advertised by selected SP
+	real currentSPExperiencedWaitTime; //the length of wait time experienced by SR before getting service
 	int visitsPerSP[N_SP];
 	int isMalicious;
 	int positiveFeedback;
 	int negativeFeedback;
 	struct ServiceProvider* currentSP;
+	struct Witness witnesses[M_SP];
 };
 
 struct SRFeedback
@@ -61,7 +69,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=20000.0;
+	real te=2000.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -120,7 +128,13 @@ int main()
 		{
 			customerArray[j].visitsPerSP[s] = 0;
 		}
-		if(j % 25 == 0)
+		for(s = 0; s < M_SP; s++)
+		{
+			customerArray[j].witnesses[s].sRequester = NON_EXISTENT;
+			customerArray[j].witnesses[s].waitTimeLength = NON_EXISTENT;
+		}
+		/*
+		if(j % 4 == 0)
 		{
 			customerArray[j].isMalicious = 1;
 		}
@@ -128,7 +142,7 @@ int main()
 		{
 			customerArray[j].isMalicious = 0;
 		}
-
+		*/
 		//initialize feedback for all the SPs
 		//Since sRequester is pointer to ServiceRequester, this has to be done here.
 		int spIndx;
@@ -163,8 +177,17 @@ int main()
 				//capture the clock time when this customer was assigned a SP
 				customerArray[customer].currentSPQueueStartTime = time();
 				customerArray[customer].currentServiceTime = expntl(Ts);
-				//customerArray[customer].currentSPExperiencedWaitTime = getSPAdvertisedWaitTime(selectedSP, currentTime);
-				
+				customerArray[customer].currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(selectedSP, currentTime);
+				//get all the witnesses so that they can be rated later when the service is received
+				int wtIndx;
+				for(wtIndx = 0; wtIndx < M_SP; wtIndx++)
+				{
+					customerArray[customer].witnesses[wtIndx].sRequester = selectedSP->currentSRInService[wtIndx];
+					if(selectedSP->currentSRInService[wtIndx] != NON_EXISTENT)
+					{
+						customerArray[customer].witnesses[wtIndx].waitTimeLength = selectedSP->currentSRInService[wtIndx]->currentSPExperiencedWaitTime;
+					}
+				}
 				selectedSP->numberOfSRVisitors++;
 				//update the currentSRInQueue for this SP
 				addNewSRToQueue(selectedSP, customerArray[customer]);
@@ -188,7 +211,7 @@ int main()
 				addSRToSPServiceArray(&customerArray[customer], serviceProviderArray);
 
 				//update the feedback to SP and SR based on the wait time
-				updateFeedbackAndWaitTime(&customerArray[customer], serviceProviderArray, customerArray);
+				updateFeedbackAndWaitTime(&customerArray[customer]);//, serviceProviderArray, customerArray);
 
 				schedule(3,customerArray[customer].currentServiceTime,customer);
 			}
@@ -201,6 +224,13 @@ int main()
 			removeSRFromSPServiceArray(&customerArray[customer], serviceProviderArray);
 
 			customerArray[customer].currentSP = NON_EXISTENT; // reset so that next time we know this customer will arrive anew
+			//reset witness for next time
+			int s;
+			for(s = 0; s < M_SP; s++)
+			{
+				customerArray[customer].witnesses[s].sRequester = NON_EXISTENT;
+				customerArray[customer].witnesses[s].waitTimeLength = NON_EXISTENT;
+			}
 			customerArray[customer].currentSPServiceStartTime = 0.0; 
 			customerArray[customer].currentSPQueueStartTime = 0.0;
 			customerArray[customer].currentSPExperiencedWaitTime = 0.0;
@@ -244,10 +274,12 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     */
     printf("\n\n");
     int cIndx;
-    printf("CId \t + Feedback\t- Feedback\n");
+    printf("CId \t + Feedback\t- Feedback\t Honesty\t Credibility\t Mal\n");
     for(cIndx = 0; cIndx < N_SR; cIndx++)
     {
-    	printf("%d\t\t %d\t\t%d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback);
+    	int credibility = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
+    	real honesty = (real) CustomerArray[cIndx].positiveFeedback / credibility;
+    	printf("%d\t\t %d\t\t%d\t %f\t %d\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, honesty, credibility, CustomerArray[cIndx].isMalicious);
     	if(cIndx == 500)
     	{
     		scanf("%s", str);
@@ -401,7 +433,7 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 	}
 }
 
-void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvider* SPArray, struct ServiceRequester* SRArray)
+void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServiceProvider* SPArray, struct ServiceRequester* SRArray)
 {
 	int spIndx, fdIndx, feedbackSP, feedbackSR;
 	struct ServiceProvider* SP;
@@ -409,10 +441,10 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 	//determine the acutal wait time by subtracting the clock time when the SR was in queue from when SR received service
 	real currentSRActualWaitTime = SR->currentSPServiceStartTime - SR->currentSPQueueStartTime;
 
-	real currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(SR->currentSP, time());
+	real currentSPAdvertisedWaitTime = SR->currentSPAdvertisedWaitTime; //getSPAdvertisedWaitTime(SR->currentSP, time());
 
 	//determine the difference between the actual wait time and current advertised wait time
-	real waitTimeDiff = currentSRActualWaitTime - currentSPAdvertisedWaitTime;
+	real waitTimeDiff = fabs(currentSRActualWaitTime - currentSPAdvertisedWaitTime);
 
 	//determine the perentage of difference
 	real diffPercentage = waitTimeDiff / currentSRActualWaitTime;
@@ -426,6 +458,8 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 		feedbackSP = 1;
 	}
 	
+	SP = SR->currentSP;
+	/*
 	for(spIndx = 0; spIndx < N_SP; spIndx++)
 	{
 		if(SR->currentSP->id == SPArray[spIndx].id)
@@ -434,7 +468,7 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 			break;
 		}
 	}
-
+	*/
 	if(feedbackSP == 1)
 	{
 		SP->feedbacks[SR->id].positiveFeedback++;
@@ -448,19 +482,19 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 	for(fdIndx = 0; fdIndx < M_SP; fdIndx++)
 	{
 		//do NOT give feedback to ownself
-		if(SP->currentSRInService[fdIndx] != NON_EXISTENT && SP->currentSRInService[fdIndx]->id != SR->id)
+		if(SR->witnesses[fdIndx].sRequester != NON_EXISTENT && SR->witnesses[fdIndx].sRequester->id != SR->id)
 		{
 			if(SP->currentSRInService[fdIndx]->currentSP->id != SP->id)
 			{
 				printf("ERROR ***** SP->currentSRInService[fdIndx]->currentSP->id != SP->id ***** ERROR");
 			}
 			//determine the difference between the wait time experienced by current SR and the witness
-			real waitTimeDiffWithWitness = currentSRActualWaitTime - SP->currentSRInService[fdIndx]->currentSPExperiencedWaitTime;
+			real waitTimeDiffWithWitness = currentSRActualWaitTime - SR->witnesses[fdIndx].waitTimeLength;
 
 			//determine the perentage of difference
 			real wtDiffPercentage = waitTimeDiffWithWitness / currentSRActualWaitTime;
 
-			if(diffPercentage > T_Margin)
+			if(wtDiffPercentage > T_Margin)
 			{
 				feedbackSR = -1;
 			}
@@ -471,11 +505,11 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 
 			if(feedbackSR == 1)
 			{
-				SP->currentSRInService[fdIndx]->positiveFeedback++;
+				SR->witnesses[fdIndx].sRequester->positiveFeedback++;
 			}
 			else
 			{
-				SP->currentSRInService[fdIndx]->negativeFeedback++;
+				SR->witnesses[fdIndx].sRequester->negativeFeedback++;
 			}
 		}
 	}
@@ -485,15 +519,19 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, struct ServiceProvid
 	//the same wait time as SP for malicious SP
 
 	real multiplier;
-	if(SR->isMalicious == 1 && !SP->isMalicious)
+	if(SR->isMalicious == 1 && SR->currentSP->isMalicious == 0)
 	{
-		multiplier = 1.0 + (1.0 - WaitTime_Offset);
+		multiplier = 2.0 - WaitTime_Offset; //(1.0 - WaitTime_Offset);
+	}
+	else if(SR->isMalicious == 1 && SR->currentSP->isMalicious == 1)
+	{
+		multiplier = WaitTime_Offset;
 	}
 	else
 	{
 		multiplier = 1.0;
 	}
 
-	SR->currentSPExperiencedWaitTime = multiplier * currentSPAdvertisedWaitTime;
+	SR->currentSPExperiencedWaitTime = multiplier * SR->currentSPAdvertisedWaitTime;
 				
 }
