@@ -7,7 +7,7 @@
 #define M_SP	20
 #define Ta	10.0
 #define Ts	1.0
-#define T_Margin	0.25 //threshold for wait time to be considered inaccurate
+#define T_Margin	0.20 //threshold for wait time to be considered inaccurate
 #define WaitTime_Offset	0.75 //the wait time offset reported by a malicious SP
 #define NON_EXISTENT -1
 
@@ -65,6 +65,9 @@ struct ServiceProvider
 
 int main()
 {
+	real maxTsTime, minTsTime;
+	maxTsTime = 0.0;
+	minTsTime = 0.0;
 	struct ServiceProvider serviceProviderArray[N_SP];
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
@@ -133,7 +136,7 @@ int main()
 			customerArray[j].witnesses[s].sRequester = NON_EXISTENT;
 			customerArray[j].witnesses[s].waitTimeLength = NON_EXISTENT;
 		}
-		/*
+		
 		if(j % 4 == 0)
 		{
 			customerArray[j].isMalicious = 1;
@@ -142,7 +145,7 @@ int main()
 		{
 			customerArray[j].isMalicious = 0;
 		}
-		*/
+		
 		//initialize feedback for all the SPs
 		//Since sRequester is pointer to ServiceRequester, this has to be done here.
 		int spIndx;
@@ -199,7 +202,20 @@ int main()
 						customerArray[customer].visitsPerSP[x]++;
 						break;
 					}
-				}				
+				}
+
+				if(maxTsTime < customerArray[customer].currentServiceTime)
+				{
+					maxTsTime = customerArray[customer].currentServiceTime;
+				}
+				if(minTsTime == 0.0)
+				{
+					minTsTime = customerArray[customer].currentServiceTime;
+				}
+				else if(minTsTime > customerArray[customer].currentServiceTime)
+				{
+					minTsTime = customerArray[customer].currentServiceTime;
+				}
 			}
 			if (request(customerArray[customer].currentSP->id,customer,0)==0) then
 			{
@@ -240,6 +256,10 @@ int main()
 		}
 	}
 	myReport(serviceProviderArray, customerArray);
+
+	printf("\n");
+
+	printf("Max Ts Time: %f\tMin Ts Time: %f\n", maxTsTime, minTsTime);
 }
 
 void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray)
@@ -273,18 +293,35 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     }
     */
     printf("\n\n");
-    int cIndx;
+    int cIndx,  malSRCount, nonMalSRCount; 
+    real totalMalHonesty, totalNonMalHonesty;
+    malSRCount = 0;
+    nonMalSRCount = 0;
+    totalMalHonesty = 0.0;
+    totalNonMalHonesty = 0.0;
     printf("CId \t + Feedback\t- Feedback\t Honesty\t Credibility\t Mal\n");
     for(cIndx = 0; cIndx < N_SR; cIndx++)
     {
     	int credibility = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
     	real honesty = (real) CustomerArray[cIndx].positiveFeedback / credibility;
-    	printf("%d\t\t %d\t\t%d\t %f\t %d\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, honesty, credibility, CustomerArray[cIndx].isMalicious);
+    	if(CustomerArray[cIndx].isMalicious == 1)
+    	{
+    		malSRCount++;
+    		totalMalHonesty += honesty;
+    	}
+    	else
+    	{
+    		nonMalSRCount++;
+    		totalNonMalHonesty += honesty;
+    	}
+
+    	printf("%d\t\t %d\t\t%d\t %f\t %d\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, honesty, credibility, CustomerArray[cIndx].isMalicious);
     	if(cIndx == 500)
     	{
     		scanf("%s", str);
     	}
     }
+    printf("Average Malicious Honesty: %f\nAverage Non-Malicious Honesty: %f\n", (totalMalHonesty/malSRCount), (totalNonMalHonesty/nonMalSRCount));
 }
 
 real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
@@ -489,21 +526,34 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServicePro
 				printf("ERROR ***** SP->currentSRInService[fdIndx]->currentSP->id != SP->id ***** ERROR");
 			}
 			//determine the difference between the wait time experienced by current SR and the witness
-			real waitTimeDiffWithWitness = currentSRActualWaitTime - SR->witnesses[fdIndx].waitTimeLength;
+			real waitTimeDiffWithWitness = fabs(currentSRActualWaitTime - SR->witnesses[fdIndx].waitTimeLength);
 
 			//determine the perentage of difference
 			real wtDiffPercentage = waitTimeDiffWithWitness / currentSRActualWaitTime;
 
-			if(wtDiffPercentage > T_Margin)
+			//if(wtDiffPercentage > T_Margin)
+			if(wtDiffPercentage > 0.85)
 			{
 				feedbackSR = -1;
 			}
 			else
 			{
 				feedbackSR = 1;
+				if(SR->witnesses[fdIndx].sRequester->isMalicious == 1 && SR->witnesses[fdIndx].waitTimeLength > 0.0)
+				{
+					//printf("Malicious witness gets positive feedback. SRID: %d\t WtID: %d\t SPID: %d\t SR Wait Time: %f\t Witness Wait Time: %f\n", SR->id, SR->witnesses[fdIndx].sRequester->id, SR->currentSP->id, currentSRActualWaitTime,  SR->witnesses[fdIndx].waitTimeLength);
+				}
 			}
 
-			if(feedbackSR == 1)
+			if(SR->isMalicious == 1 && SR->witnesses[fdIndx].sRequester->isMalicious == 1)
+			{
+				SR->witnesses[fdIndx].sRequester->positiveFeedback++;
+			}
+			else if (SR->isMalicious == 1 && SR->witnesses[fdIndx].sRequester->isMalicious == 0)
+			{
+				SR->witnesses[fdIndx].sRequester->negativeFeedback++;
+			}
+			else if(feedbackSR == 1)
 			{
 				SR->witnesses[fdIndx].sRequester->positiveFeedback++;
 			}
@@ -521,17 +571,19 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServicePro
 	real multiplier;
 	if(SR->isMalicious == 1 && SR->currentSP->isMalicious == 0)
 	{
-		multiplier = 2.0 - WaitTime_Offset; //(1.0 - WaitTime_Offset);
+		//multiplier = 2.0 - WaitTime_Offset; //(1.0 - WaitTime_Offset);
+		multiplier = 10.0;
 	}
 	else if(SR->isMalicious == 1 && SR->currentSP->isMalicious == 1)
 	{
-		multiplier = WaitTime_Offset;
+		//multiplier = WaitTime_Offset;
+		multiplier = 0.1;
 	}
 	else
 	{
 		multiplier = 1.0;
 	}
 
-	SR->currentSPExperiencedWaitTime = multiplier * SR->currentSPAdvertisedWaitTime;
+	SR->currentSPExperiencedWaitTime = multiplier * currentSRActualWaitTime;
 				
 }
