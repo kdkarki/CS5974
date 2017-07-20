@@ -244,10 +244,11 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     nonMalSRCount = 0;
     totalMalHonesty = 0.0;
     totalNonMalHonesty = 0.0;
-    printf("CId \t + Feedback\t- Feedback\t Centrality\t Honesty\t\t Mal\n");
+    printf("CId \t + Feedback\t- Feedback\t Centrality\t Honesty\t Credibility\t\t Mal\n");
     for(cIndx = 0; cIndx < N_SR; cIndx++)
     {
     	real centrality = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
+    	real credibility = centrality * CustomerArray[cIndx].honesty;
 
     	if(CustomerArray[cIndx].isMalicious == 1)
     	{
@@ -260,7 +261,7 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     		totalNonMalHonesty += CustomerArray[cIndx].honesty;
     	}
 
-    	printf("%d\t %f\t%f\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, CustomerArray[cIndx].honesty, centrality, CustomerArray[cIndx].isMalicious);
+    	printf("%d\t %f\t%f\t %f\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, centrality, CustomerArray[cIndx].honesty, credibility, CustomerArray[cIndx].isMalicious);
     	if(cIndx == 500)
     	{
     		scanf("%s", str);
