@@ -67,8 +67,9 @@ int main()
 		customerArray[j].currentSPServiceStartTime = 0.0;
 		customerArray[j].currentSPQueueStartTime = 0.0;
 		customerArray[j].currentSPWaitTimeRating = NON_EXISTENT;
-		customerArray[j].positiveFeedback = 0.0;
-		customerArray[j].negativeFeedback = 0.0;
+		customerArray[j].positiveFeedback = 1.0;
+		customerArray[j].negativeFeedback = 1.0;
+		customerArray[j].honesty = 0.0;
 		int s;
 		for(s = 0; s < N_SP; s++)
 		{
@@ -243,23 +244,23 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     nonMalSRCount = 0;
     totalMalHonesty = 0.0;
     totalNonMalHonesty = 0.0;
-    printf("CId \t + Feedback\t- Feedback\t Honesty\t Credibility\t\t\t Mal\n");
+    printf("CId \t + Feedback\t- Feedback\t Centrality\t Honesty\t\t Mal\n");
     for(cIndx = 0; cIndx < N_SR; cIndx++)
     {
-    	real credibility = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
-    	real honesty = (real) CustomerArray[cIndx].positiveFeedback / credibility;
+    	real centrality = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
+
     	if(CustomerArray[cIndx].isMalicious == 1)
     	{
     		malSRCount++;
-    		totalMalHonesty += honesty;
+    		totalMalHonesty += CustomerArray[cIndx].honesty;
     	}
     	else
     	{
     		nonMalSRCount++;
-    		totalNonMalHonesty += honesty;
+    		totalNonMalHonesty += CustomerArray[cIndx].honesty;
     	}
 
-    	printf("%d\t %f\t%f\t %f\t %f\t\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, honesty, credibility, CustomerArray[cIndx].isMalicious);
+    	printf("%d\t %f\t%f\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, CustomerArray[cIndx].honesty, centrality, CustomerArray[cIndx].isMalicious);
     	if(cIndx == 500)
     	{
     		scanf("%s", str);
@@ -528,6 +529,8 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServicePro
 
 			SR->witnesses[fdIndx].sRequester->positiveFeedback = SR->witnesses[fdIndx].sRequester->positiveFeedback + normRating;
 			SR->witnesses[fdIndx].sRequester->negativeFeedback = SR->witnesses[fdIndx].sRequester->negativeFeedback + 1 - normRating;
+
+			SR->witnesses[fdIndx].sRequester->honesty = SR->witnesses[fdIndx].sRequester->positiveFeedback / (SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback);
 		}
 	}
 				

@@ -9,12 +9,12 @@ struct Witness //Represents a witness, an SR currently in service from an SP and
 struct ServiceRequester //Represents a service requester (customer)
 {
 	int id;
+	real honesty; //honesty of the SR based on feedback provided by other SRs
 	real startTime;//simulation clock time when the customer was first added to the system
 	real currentServiceTime; //the exponential service time length this SR will use the SP for
 	real currentSPServiceStartTime; //simulation clock time when the SR received service from SR
 	real currentSPQueueStartTime; //simulation clock time when the SR was selected to request a server
 	real currentSPAdvertisedWaitTime; //the length of time to wait before getting service as advertised by selected SP
-	//real currentSPExperiencedWaitTime; //the length of wait time experienced by SR before getting service
 	int currentSPWaitTimeRating; //The service wait time rating, a number from 1 to 5, with 1 being least satisfaction and 5 being most satisfaction.
 	int visitsPerSP[N_SP];
 	int isMalicious;
