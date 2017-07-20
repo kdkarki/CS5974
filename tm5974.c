@@ -66,7 +66,9 @@ int main()
 		customerArray[j].currentServiceTime = 0.0;
 		customerArray[j].currentSPServiceStartTime = 0.0;
 		customerArray[j].currentSPQueueStartTime = 0.0;
-		customerArray[j].currentSPExperiencedWaitTime = 0.0;
+		customerArray[j].currentSPWaitTimeRating = NON_EXISTENT;
+		customerArray[j].positiveFeedback = 0.0;
+		customerArray[j].negativeFeedback = 0.0;
 		int s;
 		for(s = 0; s < N_SP; s++)
 		{
@@ -75,10 +77,10 @@ int main()
 		for(s = 0; s < M_SP; s++)
 		{
 			customerArray[j].witnesses[s].sRequester = NON_EXISTENT;
-			customerArray[j].witnesses[s].waitTimeLength = NON_EXISTENT;
+			customerArray[j].witnesses[s].waitTimeRating = NON_EXISTENT;
 		}
 		
-		if(j % 4 == 0)
+		if(j % 10 == 0)
 		{
 			customerArray[j].isMalicious = 1;
 		}
@@ -93,8 +95,8 @@ int main()
 		for(spIndx = 0; spIndx < N_SP; spIndx++)
 		{
 			serviceProviderArray[spIndx].feedbacks[j].sRequester = &customerArray[j];
-			serviceProviderArray[spIndx].feedbacks[j].positiveFeedback = 0;//for beta reputation, the initial
-			serviceProviderArray[spIndx].feedbacks[j].negativeFeedback = 0;//rating should be 0.5 so both positive and negative feedback is 1 
+			serviceProviderArray[spIndx].feedbacks[j].positiveFeedback = 0.0;//for beta reputation, the initial
+			serviceProviderArray[spIndx].feedbacks[j].negativeFeedback = 0.0;//rating should be 0.5 so both positive and negative feedback is 1 
 		}
 	}
 
@@ -129,7 +131,7 @@ int main()
 					customerArray[customer].witnesses[wtIndx].sRequester = selectedSP->currentSRInService[wtIndx];
 					if(selectedSP->currentSRInService[wtIndx] != NON_EXISTENT)
 					{
-						customerArray[customer].witnesses[wtIndx].waitTimeLength = selectedSP->currentSRInService[wtIndx]->currentSPExperiencedWaitTime;
+						customerArray[customer].witnesses[wtIndx].waitTimeRating = selectedSP->currentSRInService[wtIndx]->currentSPWaitTimeRating;
 					}
 				}
 				selectedSP->numberOfSRVisitors++;
@@ -186,11 +188,11 @@ int main()
 			for(s = 0; s < M_SP; s++)
 			{
 				customerArray[customer].witnesses[s].sRequester = NON_EXISTENT;
-				customerArray[customer].witnesses[s].waitTimeLength = NON_EXISTENT;
+				customerArray[customer].witnesses[s].waitTimeRating = NON_EXISTENT;
 			}
 			customerArray[customer].currentSPServiceStartTime = 0.0; 
 			customerArray[customer].currentSPQueueStartTime = 0.0;
-			customerArray[customer].currentSPExperiencedWaitTime = 0.0;
+			customerArray[customer].currentSPWaitTimeRating = NON_EXISTENT;
 			
 			schedule(1,expntl(Ta), customer); /* schedule next arrival time */
 			break;
@@ -206,19 +208,20 @@ int main()
 void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray)
 {
 	printf("\nSimulation Report\n");
-    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t In Queue\t Busy Period\t Current Wait Time \t + Feedback \t - Feedback\n");
+    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t In Queue\t Busy Period\t Current Wait Time \t\t + Feedback \t\t - Feedback\n");
     int i;
     for(i = 0; i < N_SP; i++)
     {
-    	int fbIndx, posFB, negFB;
-    	posFB = 0;
-    	negFB = 0;
+    	int fbIndx;
+    	real posFB, negFB;
+    	posFB = 0.0;
+    	negFB = 0.0;
     	for(fbIndx = 0; fbIndx < N_SR; fbIndx++)
     	{
     		posFB = posFB + SPArray[i].feedbacks[fbIndx].positiveFeedback;
     		negFB = negFB + SPArray[i].feedbacks[fbIndx].negativeFeedback;
     	}
-        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t     %d \t     %d\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, posFB, negFB);
+        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t     %f \t     %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, posFB, negFB);
     }
     char str[8];
     scanf("%s", str);
@@ -240,10 +243,10 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     nonMalSRCount = 0;
     totalMalHonesty = 0.0;
     totalNonMalHonesty = 0.0;
-    printf("CId \t + Feedback\t- Feedback\t Honesty\t Credibility\t Mal\n");
+    printf("CId \t + Feedback\t- Feedback\t Honesty\t Credibility\t\t\t Mal\n");
     for(cIndx = 0; cIndx < N_SR; cIndx++)
     {
-    	int credibility = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
+    	real credibility = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
     	real honesty = (real) CustomerArray[cIndx].positiveFeedback / credibility;
     	if(CustomerArray[cIndx].isMalicious == 1)
     	{
@@ -256,7 +259,7 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     		totalNonMalHonesty += honesty;
     	}
 
-    	printf("%d\t\t %d\t\t%d\t %f\t %d\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, honesty, credibility, CustomerArray[cIndx].isMalicious);
+    	printf("%d\t %f\t%f\t %f\t %f\t\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, honesty, credibility, CustomerArray[cIndx].isMalicious);
     	if(cIndx == 500)
     	{
     		scanf("%s", str);
@@ -411,49 +414,80 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 	}
 }
 
+//Once an SR is able to successfully scheduled for service with an SP then the SR needs to provide feedback
+//towards the SP as well as towards the WT based on its wait time experience. It also needs to update its 
+//wait time rating towards the SP so that it can act as witness for others
 void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServiceProvider* SPArray, struct ServiceRequester* SRArray)
 {
-	int spIndx, fdIndx, feedbackSP, feedbackSR;
+	//TODO: A Service Provider will advertise a minimum wait time of 1 minute even if the wait time is 0
+	//		This needs to be taken into account when determining the wait time rating
+	int spIndx, fdIndx;
 	struct ServiceProvider* SP;
-
-	//determine the acutal wait time by subtracting the clock time when the SR was in queue from when SR received service
-	real currentSRActualWaitTime = SR->currentSPServiceStartTime - SR->currentSPQueueStartTime;
-
-	real currentSPAdvertisedWaitTime = SR->currentSPAdvertisedWaitTime; //getSPAdvertisedWaitTime(SR->currentSP, time());
-
-	//determine the difference between the actual wait time and current advertised wait time
-	real waitTimeDiff = fabs(currentSRActualWaitTime - currentSPAdvertisedWaitTime);
-
-	//determine the perentage of difference
-	real diffPercentage = waitTimeDiff / currentSRActualWaitTime;
-
-	if(diffPercentage > T_Margin)
-	{
-		feedbackSP = -1;
-	}
-	else
-	{
-		feedbackSP = 1;
-	}
-	
 	SP = SR->currentSP;
-	/*
-	for(spIndx = 0; spIndx < N_SP; spIndx++)
+
+	//First determine the actual wait time and set the wait time rating
+
+	if(SR->isMalicious == 0)
 	{
-		if(SR->currentSP->id == SPArray[spIndx].id)
+			//determine the acutal wait time by subtracting the clock time when the SR was in queue from when SR received service
+		real currentSRActualWaitTime = SR->currentSPServiceStartTime - SR->currentSPQueueStartTime;
+
+		real currentSPAdvertisedWaitTime = SR->currentSPAdvertisedWaitTime; //getSPAdvertisedWaitTime(SR->currentSP, time());
+
+		//determine the difference between the actual wait time and current advertised wait time
+		real waitTimeDiff = fabs(currentSRActualWaitTime - currentSPAdvertisedWaitTime);
+
+		//determine the perentage of difference
+		real diffPercentage = waitTimeDiff / currentSRActualWaitTime;
+
+		if(diffPercentage > 0.25)
 		{
-			SP = &SPArray[spIndx];
-			break;
+			printf("diffPercentage is greater than 0.2. SR: %d\tSP: %d\tDifference: %f\n", SR->id, SP->id, diffPercentage);
+		}
+
+		if(diffPercentage < 0.2)
+		{
+			SR->currentSPWaitTimeRating = 5;
+		}
+		else if (diffPercentage >= 20 && diffPercentage < 40)
+		{
+			SR->currentSPWaitTimeRating = 4;
+		}
+		else if(diffPercentage >= 50 && diffPercentage < 60)
+		{
+			SR->currentSPWaitTimeRating = 3;
+		}
+		else if(diffPercentage >= 60 && diffPercentage < 80)
+		{
+			SR->currentSPWaitTimeRating = 2;
+		}
+		else
+		{
+			SR->currentSPWaitTimeRating = 1;
 		}
 	}
-	*/
-	if(feedbackSP == 1)
-	{
-		SP->feedbacks[SR->id].positiveFeedback++;
-	}
 	else
 	{
-		SP->feedbacks[SR->id].negativeFeedback++;
+		if(SP->isMalicious == 1)
+		{
+			SR->currentSPWaitTimeRating = 5;
+		}
+		else
+		{
+			SR->currentSPWaitTimeRating = 1;
+		}
+	}
+	
+	//determine the normalized rating towards the SP for this transaction
+	real f, newAlpha, newBeta;
+	f = ((real) SR->currentSPWaitTimeRating) / 5.0;
+
+	SP->feedbacks[SR->id].positiveFeedback = SP->feedbacks[SR->id].positiveFeedback + f;
+	SP->feedbacks[SR->id].negativeFeedback = SP->feedbacks[SR->id].negativeFeedback + 1.0 - f;
+
+	if(f < 1.0)
+	{
+		//printf("f is less than 1.0. SR: %d\t SP: %d\t f: %f\t +ve: %f\t -ve: %f\n", SR->id, SP->id, f, SP->feedbacks[SR->id].positiveFeedback, SP->feedbacks[SR->id].negativeFeedback);
 	}
 
 	//now provide feedback for each witness. Witness is an SR that is currently in service
@@ -466,65 +500,35 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServicePro
 			{
 				printf("ERROR ***** SP->currentSRInService[fdIndx]->currentSP->id != SP->id ***** ERROR");
 			}
-			//determine the difference between the wait time experienced by current SR and the witness
-			real waitTimeDiffWithWitness = fabs(currentSRActualWaitTime - SR->witnesses[fdIndx].waitTimeLength);
 
-			//determine the perentage of difference
-			real wtDiffPercentage = waitTimeDiffWithWitness / currentSRActualWaitTime;
+			int witnessRatingNew;
+			real normRating;
 
-			//if(wtDiffPercentage > T_Margin)
-			if(wtDiffPercentage > 0.85)
+			if(SR->isMalicious == 1)
 			{
-				feedbackSR = -1;
-			}
-			else
-			{
-				feedbackSR = 1;
-				if(SR->witnesses[fdIndx].sRequester->isMalicious == 1 && SR->witnesses[fdIndx].waitTimeLength > 0.0)
+				if(SR->witnesses[fdIndx].sRequester->isMalicious == 1)
 				{
-					//printf("Malicious witness gets positive feedback. SRID: %d\t WtID: %d\t SPID: %d\t SR Wait Time: %f\t Witness Wait Time: %f\n", SR->id, SR->witnesses[fdIndx].sRequester->id, SR->currentSP->id, currentSRActualWaitTime,  SR->witnesses[fdIndx].waitTimeLength);
+					witnessRatingNew = 5;
+				}
+				else
+				{
+					witnessRatingNew = 1;
 				}
 			}
-
-			if(SR->isMalicious == 1 && SR->witnesses[fdIndx].sRequester->isMalicious == 1)
-			{
-				SR->witnesses[fdIndx].sRequester->positiveFeedback++;
-			}
-			else if (SR->isMalicious == 1 && SR->witnesses[fdIndx].sRequester->isMalicious == 0)
-			{
-				SR->witnesses[fdIndx].sRequester->negativeFeedback++;
-			}
-			else if(feedbackSR == 1)
-			{
-				SR->witnesses[fdIndx].sRequester->positiveFeedback++;
-			}
 			else
 			{
-				SR->witnesses[fdIndx].sRequester->negativeFeedback++;
+				//determine the difference between the wait time rating experienced by current SR and the witness
+				int waitTimeRatingDiffWithWitness = abs(SR->currentSPWaitTimeRating - SR->witnesses[fdIndx].waitTimeRating);
+
+				//determine the new rating for the witness
+				witnessRatingNew = 5 - waitTimeRatingDiffWithWitness;
 			}
+
+			normRating = ((real) witnessRatingNew) / 5.0;
+
+			SR->witnesses[fdIndx].sRequester->positiveFeedback = SR->witnesses[fdIndx].sRequester->positiveFeedback + normRating;
+			SR->witnesses[fdIndx].sRequester->negativeFeedback = SR->witnesses[fdIndx].sRequester->negativeFeedback + 1 - normRating;
 		}
 	}
-
-	//also update the actual wait time observed by the current SR so that it can act as witness
-	//A malicious SR will advertise incorrect wait time for non-malicious SP and will advertise 
-	//the same wait time as SP for malicious SP
-
-	real multiplier;
-	if(SR->isMalicious == 1 && SR->currentSP->isMalicious == 0)
-	{
-		//multiplier = 2.0 - WaitTime_Offset; //(1.0 - WaitTime_Offset);
-		multiplier = 10.0;
-	}
-	else if(SR->isMalicious == 1 && SR->currentSP->isMalicious == 1)
-	{
-		//multiplier = WaitTime_Offset;
-		multiplier = 0.1;
-	}
-	else
-	{
-		multiplier = 1.0;
-	}
-
-	SR->currentSPExperiencedWaitTime = multiplier * currentSRActualWaitTime;
 				
 }

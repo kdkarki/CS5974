@@ -1,12 +1,12 @@
 #include "tm5974.h"
 
-struct Witness
+struct Witness //Represents a witness, an SR currently in service from an SP and advertising its experienced wait time rating
 {
-	real waitTimeLength;
+	int waitTimeRating;
 	struct ServiceRequester* sRequester;
 };
 
-struct ServiceRequester
+struct ServiceRequester //Represents a service requester (customer)
 {
 	int id;
 	real startTime;//simulation clock time when the customer was first added to the system
@@ -14,23 +14,24 @@ struct ServiceRequester
 	real currentSPServiceStartTime; //simulation clock time when the SR received service from SR
 	real currentSPQueueStartTime; //simulation clock time when the SR was selected to request a server
 	real currentSPAdvertisedWaitTime; //the length of time to wait before getting service as advertised by selected SP
-	real currentSPExperiencedWaitTime; //the length of wait time experienced by SR before getting service
+	//real currentSPExperiencedWaitTime; //the length of wait time experienced by SR before getting service
+	int currentSPWaitTimeRating; //The service wait time rating, a number from 1 to 5, with 1 being least satisfaction and 5 being most satisfaction.
 	int visitsPerSP[N_SP];
 	int isMalicious;
-	int positiveFeedback;
-	int negativeFeedback;
+	real positiveFeedback;
+	real negativeFeedback;
 	struct ServiceProvider* currentSP;
-	struct Witness witnesses[M_SP];
+	struct Witness witnesses[M_SP]; //an array of witnesses that were present at the SP when the SP was selected for the service
 };
 
-struct SRFeedback
+struct SRFeedback //Represents feedback from an SR towards an SP. Each SR will have +ve or -ve rating towards an SP for each transaction
 {
-	int positiveFeedback;
-	int negativeFeedback;
+	real positiveFeedback;
+	real negativeFeedback;
 	struct ServiceRequester* sRequester;
 };
 
-struct ServiceProvider
+struct ServiceProvider //Represents a service provider
 {
 	int id;
 	int numberOfSRVisitors;
@@ -40,5 +41,5 @@ struct ServiceProvider
 	//int currentSRInQueue[M_SP];
 	real availabilitySlotList[M_SP];//this is used to calculate the next available time
 	struct ServiceRequester* currentSRInService[M_SP];//SRs being serviced by the SP
-	struct SRFeedback feedbacks[N_SR];
+	struct SRFeedback feedbacks[N_SR]; //an array of feedback where each feedback is from a uniqure SR
 };
