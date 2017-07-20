@@ -70,6 +70,7 @@ int main()
 		customerArray[j].positiveFeedback = 1.0;
 		customerArray[j].negativeFeedback = 1.0;
 		customerArray[j].honesty = 0.0;
+		customerArray[j].credibility = 0.0;
 		int s;
 		for(s = 0; s < N_SP; s++)
 		{
@@ -248,7 +249,6 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     for(cIndx = 0; cIndx < N_SR; cIndx++)
     {
     	real centrality = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
-    	real credibility = centrality * CustomerArray[cIndx].honesty;
 
     	if(CustomerArray[cIndx].isMalicious == 1)
     	{
@@ -261,7 +261,7 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     		totalNonMalHonesty += CustomerArray[cIndx].honesty;
     	}
 
-    	printf("%d\t %f\t%f\t %f\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, centrality, CustomerArray[cIndx].honesty, credibility, CustomerArray[cIndx].isMalicious);
+    	printf("%d\t %f\t%f\t %f\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, centrality, CustomerArray[cIndx].honesty, CustomerArray[cIndx].credibility, CustomerArray[cIndx].isMalicious);
     	if(cIndx == 500)
     	{
     		scanf("%s", str);
@@ -532,6 +532,7 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServicePro
 			SR->witnesses[fdIndx].sRequester->negativeFeedback = SR->witnesses[fdIndx].sRequester->negativeFeedback + 1 - normRating;
 
 			SR->witnesses[fdIndx].sRequester->honesty = SR->witnesses[fdIndx].sRequester->positiveFeedback / (SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback);
+			SR->witnesses[fdIndx].sRequester->credibility = SR->witnesses[fdIndx].sRequester->honesty * (SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback);
 		}
 	}
 				

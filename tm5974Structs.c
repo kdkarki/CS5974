@@ -10,6 +10,7 @@ struct ServiceRequester //Represents a service requester (customer)
 {
 	int id;
 	real honesty; //honesty of the SR based on feedback provided by other SRs
+	real credibility; //credibility of the SR based on the centrality and honesty
 	real startTime;//simulation clock time when the customer was first added to the system
 	real currentServiceTime; //the exponential service time length this SR will use the SP for
 	real currentSPServiceStartTime; //simulation clock time when the SR received service from SR
