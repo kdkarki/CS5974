@@ -1,7 +1,7 @@
 #include "smpl.h"
 #include <math.h>
 #include "tm5974.h"
-#include <tm5974Structs.c>
+#include "tm5974Structs.c"
 
 
 int main()
