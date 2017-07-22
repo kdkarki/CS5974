@@ -5,8 +5,8 @@
 #define M_SP	20
 #define Ta	10.0
 #define Ts	1.0
-#define T_Margin	0.20 //threshold for wait time to be considered inaccurate
-#define WaitTime_Offset	0.75 //the wait time offset reported by a malicious SP
+//#define T_Margin	0.20 //threshold for wait time to be considered inaccurate
+#define WaitTime_Offset	0.50 //the wait time offset reported by a malicious SP
 #define NON_EXISTENT -1
 
 void myReport();

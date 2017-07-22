@@ -1,14 +1,15 @@
-#include "smpl.h"
 #include <math.h>
+#include "smpl.h"
 #include "tm5974.h"
-#include <tm5974Structs.c>
+#include "tm5974Structs.c"
 
 
 int main()
 {
-	real maxTsTime, minTsTime;
+	real maxTsTime, minTsTime, totalCredibility;
 	maxTsTime = 0.0;
 	minTsTime = 0.0;
+	totalCredibility = 0.0;
 	struct ServiceProvider serviceProviderArray[N_SP];
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
@@ -17,8 +18,6 @@ int main()
 	int customer=0;
 	int server=0;
 	int event;
-	//real ts[N_SR]; /* start time stamp */
-	//int sp_id[N_SR]; /* SP ID selected */
 
 	smpl(0,"5974");
 	//trace(2);
@@ -34,12 +33,12 @@ int main()
         serviceProviderArray[i].nextAvailTimeSlot = 0.0;
         serviceProviderArray[i].isMalicious = 0;
               
-        
+        /*
         if(i == 3 || i == 6)
         {
             serviceProviderArray[i].isMalicious = 1;
         }
-        
+        */
         
 		int sr, avlSL, srInService;
 		//initialize availabilitySlotList
@@ -81,8 +80,8 @@ int main()
 			customerArray[j].witnesses[s].sRequester = NON_EXISTENT;
 			customerArray[j].witnesses[s].waitTimeRating = NON_EXISTENT;
 		}
-		
-		if(j % 10 == 0)
+		/*
+		if(j % 4 == 0)
 		{
 			customerArray[j].isMalicious = 1;
 		}
@@ -90,15 +89,16 @@ int main()
 		{
 			customerArray[j].isMalicious = 0;
 		}
-		
+		*/
 		//initialize feedback for all the SPs
 		//Since sRequester is pointer to ServiceRequester, this has to be done here.
 		int spIndx;
 		for(spIndx = 0; spIndx < N_SP; spIndx++)
 		{
 			serviceProviderArray[spIndx].feedbacks[j].sRequester = &customerArray[j];
-			serviceProviderArray[spIndx].feedbacks[j].positiveFeedback = 0.0;//for beta reputation, the initial
-			serviceProviderArray[spIndx].feedbacks[j].negativeFeedback = 0.0;//rating should be 0.5 so both positive and negative feedback is 1 
+			serviceProviderArray[spIndx].feedbacks[j].positiveFeedback = 1.0;//for beta reputation, the initial rating should be 0.5 
+			serviceProviderArray[spIndx].feedbacks[j].negativeFeedback = 1.0;//so both positive and negative feedback is 1 
+			serviceProviderArray[spIndx].feedbacks[j].trustScore = 0.0;
 		}
 	}
 
@@ -172,7 +172,7 @@ int main()
 				addSRToSPServiceArray(&customerArray[customer], serviceProviderArray);
 
 				//update the feedback to SP and SR based on the wait time
-				updateFeedbackAndWaitTime(&customerArray[customer]);//, serviceProviderArray, customerArray);
+				updateFeedbackAndWaitTime(&customerArray[customer], &totalCredibility);
 
 				schedule(3,customerArray[customer].currentServiceTime,customer);
 			}
@@ -210,20 +210,32 @@ int main()
 void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray)
 {
 	printf("\nSimulation Report\n");
-    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t In Queue\t Busy Period\t Current Wait Time \t\t + Feedback \t\t - Feedback\n");
+    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t In Queue\t Busy Period\t Next Avail Time Slot\tTrust Score\n");
     int i;
     for(i = 0; i < N_SP; i++)
     {
-    	int fbIndx;
-    	real posFB, negFB;
+    	int fbIndx, fbSRCount;
+    	real posFB, negFB, trustScore;
     	posFB = 0.0;
     	negFB = 0.0;
+    	trustScore = 0.0;
+    	fbSRCount = 0;
     	for(fbIndx = 0; fbIndx < N_SR; fbIndx++)
     	{
     		posFB = posFB + SPArray[i].feedbacks[fbIndx].positiveFeedback;
     		negFB = negFB + SPArray[i].feedbacks[fbIndx].negativeFeedback;
+
+    		if(SPArray[i].feedbacks[fbIndx].trustScore > 0.0)
+    		{
+    			fbSRCount++;
+    			trustScore = trustScore + SPArray[i].feedbacks[fbIndx].trustScore;
+    		}
     	}
-        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t     %f \t     %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, posFB, negFB);
+    	if(fbSRCount > 0)
+    	{
+    		trustScore = trustScore / fbSRCount;
+    	}
+        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, SPArray[i].trustScore);
     }
     char str[8];
     scanf("%s", str);
@@ -284,13 +296,11 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 	}
 	real advertisedWaitTime;
 	advertisedWaitTime = multiplier * (SP->nextAvailTimeSlot - currentTime);
-	if(advertisedWaitTime > 0.0)
+	
+
+	if(advertisedWaitTime < 0.0)
 	{
-		//printf("Advertised wait time greater than 0.00. SP%d, wait time: %f\n", SP->id, advertisedWaitTime);
-	}
-	if(advertisedWaitTime < 0)
-	{
-		advertisedWaitTime = 0.0;
+		advertisedWaitTime = 0.0167; //minimum wait time is 1 minute
 	}
 	return advertisedWaitTime;
 }
@@ -385,7 +395,6 @@ void addSRToSPServiceArray(struct ServiceRequester* SR, struct ServiceProvider* 
 	{
 		if(SP->currentSRInService[srInServIndx] == NON_EXISTENT)
 		{
-			//SP->currentSRInService[srInServIndx] = SR->id;
 			SP->currentSRInService[srInServIndx] = SR;
 			break;
 		}
@@ -419,7 +428,7 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 //Once an SR is able to successfully scheduled for service with an SP then the SR needs to provide feedback
 //towards the SP as well as towards the WT based on its wait time experience. It also needs to update its 
 //wait time rating towards the SP so that it can act as witness for others
-void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServiceProvider* SPArray, struct ServiceRequester* SRArray)
+void updateFeedbackAndWaitTime(struct ServiceRequester* SR, real* netCredibility)
 {
 	//TODO: A Service Provider will advertise a minimum wait time of 1 minute even if the wait time is 0
 	//		This needs to be taken into account when determining the wait time rating
@@ -437,29 +446,42 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServicePro
 		real currentSPAdvertisedWaitTime = SR->currentSPAdvertisedWaitTime; //getSPAdvertisedWaitTime(SR->currentSP, time());
 
 		//determine the difference between the actual wait time and current advertised wait time
-		real waitTimeDiff = fabs(currentSRActualWaitTime - currentSPAdvertisedWaitTime);
+		real waitTimeDiff;
+
+		if(currentSRActualWaitTime == 0.0 && currentSPAdvertisedWaitTime == 0.0167)
+		{
+			//if the SR wait time was 0.0 then
+			waitTimeDiff = 0.00;
+		}
+		else
+		{
+			waitTimeDiff = fabs(currentSRActualWaitTime - currentSPAdvertisedWaitTime);
+		}
 
 		//determine the perentage of difference
-		real diffPercentage = waitTimeDiff / currentSRActualWaitTime;
-
-		if(diffPercentage > 0.25)
+		real diffPercentage;
+		if(currentSRActualWaitTime == 0.00)
 		{
-			printf("diffPercentage is greater than 0.2. SR: %d\tSP: %d\tDifference: %f\n", SR->id, SP->id, diffPercentage);
+			diffPercentage = 0.00;
+		}
+		else
+		{
+		 	diffPercentage = waitTimeDiff / currentSRActualWaitTime;
 		}
 
 		if(diffPercentage < 0.2)
 		{
 			SR->currentSPWaitTimeRating = 5;
 		}
-		else if (diffPercentage >= 20 && diffPercentage < 40)
+		else if (diffPercentage >= 0.20 && diffPercentage < 0.40)
 		{
 			SR->currentSPWaitTimeRating = 4;
 		}
-		else if(diffPercentage >= 50 && diffPercentage < 60)
+		else if(diffPercentage >= 0.50 && diffPercentage < 0.60)
 		{
 			SR->currentSPWaitTimeRating = 3;
 		}
-		else if(diffPercentage >= 60 && diffPercentage < 80)
+		else if(diffPercentage >= 0.60 && diffPercentage < 0.80)
 		{
 			SR->currentSPWaitTimeRating = 2;
 		}
@@ -487,11 +509,14 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServicePro
 	SP->feedbacks[SR->id].positiveFeedback = SP->feedbacks[SR->id].positiveFeedback + f;
 	SP->feedbacks[SR->id].negativeFeedback = SP->feedbacks[SR->id].negativeFeedback + 1.0 - f;
 
+	//calcualte the trust score towards the SP from this SR
+	SP->feedbacks[SR->id].trustScore = SP->feedbacks[SR->id].positiveFeedback / (SP->feedbacks[SR->id].positiveFeedback + SP->feedbacks[SR->id].negativeFeedback);
+	/*
 	if(f < 1.0)
 	{
-		//printf("f is less than 1.0. SR: %d\t SP: %d\t f: %f\t +ve: %f\t -ve: %f\n", SR->id, SP->id, f, SP->feedbacks[SR->id].positiveFeedback, SP->feedbacks[SR->id].negativeFeedback);
+		printf("f is less than 1.0. SR: %d\t SP: %d\t f: %f\t +ve: %f\t -ve: %f\n", SR->id, SP->id, f, SP->feedbacks[SR->id].positiveFeedback, SP->feedbacks[SR->id].negativeFeedback);
 	}
-
+	*/
 	//now provide feedback for each witness. Witness is an SR that is currently in service
 	for(fdIndx = 0; fdIndx < M_SP; fdIndx++)
 	{
@@ -531,9 +556,32 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)//, struct ServicePro
 			SR->witnesses[fdIndx].sRequester->positiveFeedback = SR->witnesses[fdIndx].sRequester->positiveFeedback + normRating;
 			SR->witnesses[fdIndx].sRequester->negativeFeedback = SR->witnesses[fdIndx].sRequester->negativeFeedback + 1 - normRating;
 
+			*netCredibility = *netCredibility - SR->witnesses[fdIndx].sRequester->credibility;
+
 			SR->witnesses[fdIndx].sRequester->honesty = SR->witnesses[fdIndx].sRequester->positiveFeedback / (SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback);
 			SR->witnesses[fdIndx].sRequester->credibility = SR->witnesses[fdIndx].sRequester->honesty * (SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback);
+
+			*netCredibility = *netCredibility + SR->witnesses[fdIndx].sRequester->credibility;
 		}
 	}
+
+	//update the trust score of the SP based on the new trust score from the SR
+	int srIndx;
+	real newTrustScore;
+	newTrustScore = 0.0; //the new trust score of the SP calculated based on the latest updates
+
+	// Calculate the new trust score as weighted sum of trust from each SR
+	// where credibility of the SR is used for weight
+	for(srIndx = 0; srIndx < N_SR; srIndx++)
+	{
+		//use the trust score of the SR only if the trust score the SR towards the SP is greater than 0.0
+		//This will ensure that the SR has provided at least 1 feedback towards the SP
+		if(SP->feedbacks[srIndx].trustScore > 0.0)
+		{
+			newTrustScore = newTrustScore + ((SP->feedbacks[srIndx].sRequester->credibility / *netCredibility) * SP->feedbacks[srIndx].trustScore);
+		}
+	}
+
+	SP->trustScore = newTrustScore;
 				
 }

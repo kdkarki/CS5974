@@ -29,6 +29,7 @@ struct SRFeedback //Represents feedback from an SR towards an SP. Each SR will h
 {
 	real positiveFeedback;
 	real negativeFeedback;
+	real trustScore; //trust score from each SR towards an SP.
 	struct ServiceRequester* sRequester;
 };
 
