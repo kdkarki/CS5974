@@ -14,7 +14,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=2000.0;
+	real te=20000.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -295,7 +295,7 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 
 	if(SP->isMalicious == 1)
 	{	
-		multiplier = WaitTime_Offset;
+		multiplier = (1.0 - Param_R);
 	}
 	else
 	{
