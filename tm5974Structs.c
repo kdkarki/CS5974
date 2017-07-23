@@ -44,4 +44,5 @@ struct ServiceProvider //Represents a service provider
 	real availabilitySlotList[M_SP];//this is used to calculate the next available time
 	struct ServiceRequester* currentSRInService[M_SP];//SRs being serviced by the SP
 	struct SRFeedback feedbacks[N_SR]; //an array of feedback where each feedback is from a uniqure SR
+	real netSRCredibility; //sum of credibility of all the SR that have provided feedback towards this SP
 };
