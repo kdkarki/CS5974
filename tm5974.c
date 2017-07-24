@@ -6,9 +6,10 @@
 
 int main()
 {
-	real maxTsTime, minTsTime;
+	real maxTsTime, minTsTime, highestCentrality;
 	maxTsTime = 0.0;
 	minTsTime = 0.0;
+	highestCentrality = 0.0;
 
 	struct ServiceProvider serviceProviderArray[N_SP];
 	struct ServiceRequester customerArray[N_SR];
@@ -173,7 +174,7 @@ int main()
 				addSRToSPServiceArray(&customerArray[customer], serviceProviderArray);
 
 				//update the feedback to SP and SR based on the wait time
-				updateFeedbackAndWaitTime(&customerArray[customer]);
+				updateFeedbackAndWaitTime(&customerArray[customer], &highestCentrality);
 
 				schedule(3,customerArray[customer].currentServiceTime,customer);
 			}
@@ -201,17 +202,17 @@ int main()
 			break;
 		}
 	}
-	myReport(serviceProviderArray, customerArray);
+	myReport(serviceProviderArray, customerArray, &highestCentrality);
 
 	printf("\n");
 
 	printf("Max Ts Time: %f\tMin Ts Time: %f\n", maxTsTime, minTsTime);
 }
 
-void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray)
+void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray, real* highestCentrality)
 {
 	printf("\nSimulation Report\n");
-    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t In Queue\t Busy Period\t Next Avail Time Slot\tTrust Score\n");
+    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t InQ\t Busy Period\t Next Avail Slot\tTrust Score\n");
     int i;
     for(i = 0; i < N_SP; i++)
     {
@@ -236,9 +237,9 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     	{
     		trustScore = trustScore / fbSRCount;
     	}
-        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t\t %f \t %f \t\t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, SPArray[i].trustScore);
+        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t %f \t %f \t\t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, SPArray[i].trustScore);
     }
-    //char str[8];
+    char str[8];
     //scanf("%s", str);
     //report();
     /*for(i = 0; i < N_SP; i++)
@@ -260,7 +261,7 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     totalNonMalHonesty = 0.0;
     totalMaliciousCredibility = 0.0;
     totalNonMaliciousCredibility = 0.0;
-    //printf("CId \t + Feedback\t- Feedback\t Centrality\t Honesty\t Credibility\t\t Mal\n");
+    printf("CId \t + Feedback\t- Feedback\t Centrality\t Norm. Centrality\t Honesty\t Credibility\t\t Mal\n");
     for(cIndx = 0; cIndx < N_SR; cIndx++)
     {
     	real centrality = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
@@ -277,16 +278,17 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     		totalNonMalHonesty += CustomerArray[cIndx].honesty;
     		totalNonMaliciousCredibility += CustomerArray[cIndx].credibility;
     	}
-    	/*
-    	printf("%d\t %f\t%f\t %f\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, centrality, CustomerArray[cIndx].honesty, CustomerArray[cIndx].credibility, CustomerArray[cIndx].isMalicious);
+    	
+    	printf("%d\t %f\t %f\t %f\t %f\t\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, centrality, (centrality / *highestCentrality), CustomerArray[cIndx].honesty, CustomerArray[cIndx].credibility, CustomerArray[cIndx].isMalicious);
     	if(cIndx == 500)
     	{
     		scanf("%s", str);
     	}
-    	*/
+    	
     }
     printf("Average Malicious SR Honesty: %f\nAverage Non-Malicious SR Honesty: %f\n", (totalMalHonesty/malSRCount), (totalNonMalHonesty/nonMalSRCount));
     printf("Average Malicious SR Credibility: %f\nAverage Non-Malicious SR Credibility: %f\n", (totalMaliciousCredibility/malSRCount), (totalNonMaliciousCredibility/nonMalSRCount));
+    printf("Highest Centrality: %f\n", *highestCentrality);
 }
 
 real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
@@ -431,7 +433,7 @@ void removeSRFromSPServiceArray(struct ServiceRequester* SR, struct ServiceProvi
 //Once an SR is able to successfully scheduled for service with an SP then the SR needs to provide feedback
 //towards the SP as well as towards the WT based on its wait time experience. It also needs to update its 
 //wait time rating towards the SP so that it can act as witness for others
-void updateFeedbackAndWaitTime(struct ServiceRequester* SR)
+void updateFeedbackAndWaitTime(struct ServiceRequester* SR, real* highestCentrality)
 {
 	//TODO: A Service Provider will advertise a minimum wait time of 1 minute even if the wait time is 0
 	//		This needs to be taken into account when determining the wait time rating
@@ -555,8 +557,13 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR)
 			SR->witnesses[fdIndx].sRequester->positiveFeedback = SR->witnesses[fdIndx].sRequester->positiveFeedback + normRating;
 			SR->witnesses[fdIndx].sRequester->negativeFeedback = SR->witnesses[fdIndx].sRequester->negativeFeedback + 1 - normRating;
 
+			if(*highestCentrality == 0.00 || (*highestCentrality < (SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback)))
+			{
+				*highestCentrality = SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback;
+			}
+
 			SR->witnesses[fdIndx].sRequester->honesty = SR->witnesses[fdIndx].sRequester->positiveFeedback / (SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback);
-			SR->witnesses[fdIndx].sRequester->credibility = SR->witnesses[fdIndx].sRequester->honesty * (SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback);
+			SR->witnesses[fdIndx].sRequester->credibility = SR->witnesses[fdIndx].sRequester->honesty * ((SR->witnesses[fdIndx].sRequester->positiveFeedback + SR->witnesses[fdIndx].sRequester->negativeFeedback) / *highestCentrality);
 		}
 	}
 
