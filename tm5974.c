@@ -307,7 +307,7 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 	advertisedWaitTime = multiplier * (SP->nextAvailTimeSlot - currentTime);
 	
 
-	if(advertisedWaitTime < 0.0)
+	if(advertisedWaitTime < 0.0167)
 	{
 		advertisedWaitTime = 0.0167; //minimum wait time is 1 minute
 	}
@@ -453,15 +453,20 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, real* highestCentral
 		//determine the difference between the actual wait time and current advertised wait time
 		real waitTimeDiff;
 
-		if(currentSRActualWaitTime == 0.0 && currentSPAdvertisedWaitTime == 0.0167)
+		if(currentSRActualWaitTime <= 0.0167 && currentSPAdvertisedWaitTime == 0.0167)
 		{
-			//if the SR wait time was 0.00 and SP had advertised a wait time of 1 min (0.0167)
+			//if the SR wait time was less than 1 minute and SP had advertised a wait time of 1 min (0.0167)
 			//then se the waitTimeDiff to 0.00
 			waitTimeDiff = 0.00;
 		}
 		else
 		{
 			waitTimeDiff = fabs(currentSRActualWaitTime - currentSPAdvertisedWaitTime);
+			/*printf("Wait time is more than 0.00. Current Time: %f SR: %d SP: %d In Queue: %d Current SR Actual Wait Time: %f SP Advertised Wait Time: %f\n", time(), SR->id, SP->id, inq(SP->id), currentSRActualWaitTime, currentSPAdvertisedWaitTime);
+			char str[8];
+    		scanf("%s", str);
+    		printf("Advertised Wait Time: %f\n", getSPAdvertisedWaitTime(SP, time()));
+    		*/
 		}
 
 		//determine the perentage of difference
