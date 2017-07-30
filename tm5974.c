@@ -15,7 +15,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=20000.0;
+	real te=2000000.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -106,6 +106,14 @@ int main()
 
 	while (time()<te)
 	{
+		real timeNow = time();
+		int timeNowInt = (int) timeNow;
+		if(timeNow == 0.00 || ((((int)timeNow) % 2000 == 0) && timeNow > 1500.00 && timeNow > ((real)timeNowInt + 0.996)) || (timeNow < 1000 && (((int)timeNow) % 100 == 0) && timeNow > ((real)timeNowInt + 0.996)))
+		{
+			printf("************************************ Current Time: %f ************************************\n", time());
+			myReport(serviceProviderArray, customerArray, &highestCentrality, 0);
+			printf("\n");
+		}
 		cause(&event,&customer);
 		switch(event)
 		{
@@ -202,14 +210,14 @@ int main()
 			break;
 		}
 	}
-	myReport(serviceProviderArray, customerArray, &highestCentrality);
+	myReport(serviceProviderArray, customerArray, &highestCentrality, 1);
 
 	printf("\n");
 
 	printf("Max Ts Time: %f\tMin Ts Time: %f\n", maxTsTime, minTsTime);
 }
 
-void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray, real* highestCentrality)
+void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray, real* highestCentrality, int isFinalReport)
 {
 	printf("\nSimulation Report\n");
     printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t InQ\t Busy Period\t Next Avail Slot\tTrust Score\n");
@@ -239,56 +247,59 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     	}
         printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t %f \t %f \t\t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, SPArray[i].trustScore);
     }
-    char str[8];
-    //scanf("%s", str);
-    //report();
-    /*for(i = 0; i < N_SP; i++)
+    if(isFinalReport == 1)
     {
-    	printf("\nCurrent SR in Service for SP%d\n\t", i);
-    	int sr;
-    	for(sr = 0; sr < M_SP; sr++)
-    	{
-    		printf("%d\t", SPArray[i].currentSRInService[sr]->id);
-    	}
-    }
-    */
-    printf("\n\n");
-    int cIndx,  malSRCount, nonMalSRCount; 
-    real totalMalHonesty, totalNonMalHonesty, totalMaliciousCredibility, totalNonMaliciousCredibility;
-    malSRCount = 0;
-    nonMalSRCount = 0;
-    totalMalHonesty = 0.0;
-    totalNonMalHonesty = 0.0;
-    totalMaliciousCredibility = 0.0;
-    totalNonMaliciousCredibility = 0.0;
-    printf("CId \t + Feedback\t- Feedback\t Centrality\t Norm. Centrality\t Honesty\t Credibility\t\t Mal\n");
-    for(cIndx = 0; cIndx < N_SR; cIndx++)
-    {
-    	real centrality = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
+	    char str[8];
+	    //scanf("%s", str);
+	    //report();
+	    /*for(i = 0; i < N_SP; i++)
+	    {
+	    	printf("\nCurrent SR in Service for SP%d\n\t", i);
+	    	int sr;
+	    	for(sr = 0; sr < M_SP; sr++)
+	    	{
+	    		printf("%d\t", SPArray[i].currentSRInService[sr]->id);
+	    	}
+	    }
+	    */
+	    printf("\n\n");
+	    int cIndx,  malSRCount, nonMalSRCount; 
+	    real totalMalHonesty, totalNonMalHonesty, totalMaliciousCredibility, totalNonMaliciousCredibility;
+	    malSRCount = 0;
+	    nonMalSRCount = 0;
+	    totalMalHonesty = 0.0;
+	    totalNonMalHonesty = 0.0;
+	    totalMaliciousCredibility = 0.0;
+	    totalNonMaliciousCredibility = 0.0;
+	    printf("CId \t + Feedback\t- Feedback\t Centrality\t Norm. Centrality\t Honesty\t Credibility\t\t Mal\n");
+	    for(cIndx = 0; cIndx < N_SR; cIndx++)
+	    {
+	    	real centrality = CustomerArray[cIndx].positiveFeedback + CustomerArray[cIndx].negativeFeedback;
 
-    	if(CustomerArray[cIndx].isMalicious == 1)
-    	{
-    		malSRCount++;
-    		totalMalHonesty += CustomerArray[cIndx].honesty;
-    		totalMaliciousCredibility += CustomerArray[cIndx].credibility;
-    	}
-    	else
-    	{
-    		nonMalSRCount++;
-    		totalNonMalHonesty += CustomerArray[cIndx].honesty;
-    		totalNonMaliciousCredibility += CustomerArray[cIndx].credibility;
-    	}
-    	
-    	printf("%d\t %f\t %f\t %f\t %f\t\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, centrality, (centrality / *highestCentrality), CustomerArray[cIndx].honesty, CustomerArray[cIndx].credibility, CustomerArray[cIndx].isMalicious);
-    	if(cIndx == 500)
-    	{
-    		scanf("%s", str);
-    	}
-    	
-    }
-    printf("Average Malicious SR Honesty: %f\nAverage Non-Malicious SR Honesty: %f\n", (totalMalHonesty/malSRCount), (totalNonMalHonesty/nonMalSRCount));
-    printf("Average Malicious SR Credibility: %f\nAverage Non-Malicious SR Credibility: %f\n", (totalMaliciousCredibility/malSRCount), (totalNonMaliciousCredibility/nonMalSRCount));
-    printf("Highest Centrality: %f\n", *highestCentrality);
+	    	if(CustomerArray[cIndx].isMalicious == 1)
+	    	{
+	    		malSRCount++;
+	    		totalMalHonesty += CustomerArray[cIndx].honesty;
+	    		totalMaliciousCredibility += CustomerArray[cIndx].credibility;
+	    	}
+	    	else
+	    	{
+	    		nonMalSRCount++;
+	    		totalNonMalHonesty += CustomerArray[cIndx].honesty;
+	    		totalNonMaliciousCredibility += CustomerArray[cIndx].credibility;
+	    	}
+	    	
+	    	printf("%d\t %f\t %f\t %f\t %f\t\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, centrality, (centrality / *highestCentrality), CustomerArray[cIndx].honesty, CustomerArray[cIndx].credibility, CustomerArray[cIndx].isMalicious);
+	    	if(cIndx == 500)
+	    	{
+	    		scanf("%s", str);
+	    	}
+	    	
+	    }
+	    printf("Average Malicious SR Honesty: %f\nAverage Non-Malicious SR Honesty: %f\n", (totalMalHonesty/malSRCount), (totalNonMalHonesty/nonMalSRCount));
+	    printf("Average Malicious SR Credibility: %f\nAverage Non-Malicious SR Credibility: %f\n", (totalMaliciousCredibility/malSRCount), (totalNonMaliciousCredibility/nonMalSRCount));
+	    printf("Highest Centrality: %f\n", *highestCentrality);
+	}
 }
 
 real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
@@ -572,6 +583,7 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, real* highestCentral
 		}
 	}
 
+	/*
 	//To update the trust score towards SP, net credibility of all SR that have provided feedback to this SP needs to calculated first
 	//first reset the net credibility
 	SP->netSRCredibility = 0.00;
@@ -582,21 +594,71 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, real* highestCentral
 			SP->netSRCredibility = SP->netSRCredibility + SP->feedbacks[fdIndx].sRequester->credibility;
 		}
 	}
+	*/
+
+	//determine top N_Rec SR to calculate the trust score of SP
+	struct SRFeedback *highestRecommenders[N_Rec];
+	int rIndx, srIndx;
+	for(rIndx = 0; rIndx < N_Rec; rIndx++)
+	{
+		highestRecommenders[rIndx] = NON_EXISTENT;
+	}
+
+	for(srIndx = 0; srIndx < N_SR; srIndx++)
+	{
+		if(SP->feedbacks[srIndx].trustScore > 0.0)
+		{
+			struct SRFeedback *currentRec = &SP->feedbacks[srIndx];
+			for(rIndx = 0; rIndx < N_Rec; rIndx++)
+			{
+				if(highestRecommenders[rIndx] == NON_EXISTENT)
+				{
+					highestRecommenders[rIndx] = currentRec;
+				}
+				else
+				{
+					if(highestRecommenders[rIndx]->sRequester->credibility < currentRec->sRequester->credibility)
+					{
+						struct SRFeedback *tempSRF = highestRecommenders[rIndx];
+						highestRecommenders[rIndx] = currentRec;
+						currentRec = tempSRF;
+					}
+				}
+			}
+		}
+	}
 
 	//update the trust score of the SP based on the new trust score from the SR
-	int srIndx;
+	//int srIndx;
 	real newTrustScore;
 	newTrustScore = 0.0; //the new trust score of the SP calculated based on the latest updates
 
 	// Calculate the new trust score as weighted sum of trust from each SR
 	// where credibility of the SR is used for weight
-	for(srIndx = 0; srIndx < N_SR; srIndx++)
+	/*for(srIndx = 0; srIndx < N_SR; srIndx++)
 	{
 		//use the trust score of the SR only if the trust score the SR towards the SP is greater than 0.0
 		//This will ensure that the SR has provided at least 1 feedback towards the SP
 		if(SP->feedbacks[srIndx].trustScore > 0.0)
 		{
 			newTrustScore = newTrustScore + ((SP->feedbacks[srIndx].sRequester->credibility / SP->netSRCredibility) * SP->feedbacks[srIndx].trustScore);
+		}
+	}
+	*/
+	//determine the total credibility of of N_Rec
+	SP->netSRCredibility = 0.0;
+	for(rIndx = 0; rIndx < N_Rec; rIndx++)
+	{
+		if(highestRecommenders[rIndx] != NON_EXISTENT)
+		{
+			SP->netSRCredibility += highestRecommenders[rIndx]->sRequester->credibility;
+		}
+	}
+	for(rIndx = 0; rIndx < N_Rec; rIndx++)
+	{
+		if(highestRecommenders[rIndx] != NON_EXISTENT)
+		{
+			newTrustScore = newTrustScore + ((highestRecommenders[rIndx]->sRequester->credibility / SP->netSRCredibility) * highestRecommenders[rIndx]->trustScore);
 		}
 	}
 	if(SP->id == 1 && SP->trustScore > 1.0)
