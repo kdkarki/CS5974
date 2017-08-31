@@ -4,6 +4,7 @@ struct Witness //Represents a witness, an SR currently in service from an SP and
 {
 	int waitTimeRating;
 	struct ServiceRequester* sRequester;
+	real waitTime;
 };
 
 struct ServiceRequester //Represents a service requester (customer)

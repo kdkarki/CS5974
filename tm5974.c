@@ -81,6 +81,7 @@ int main()
 		{
 			customerArray[j].witnesses[s].sRequester = NON_EXISTENT;
 			customerArray[j].witnesses[s].waitTimeRating = NON_EXISTENT;
+			customerArray[j].witnesses[s].waitTime = NON_EXISTENT;
 		}
 		
 		if((j % 5 == 0) || (j % 9 == 0))//30% //(j % 5 == 0)//20%//(j % 4 == 0 || j % 5 == 0)//40%
@@ -149,7 +150,7 @@ printf("C_ID\tTime\tF_ID\tInQ\tTrust Score\tActual WT\tAdv WT\t\tProjected WT\tA
 				struct ServiceProvider* selectedSP = getLeastBusySP(serviceProviderArray, currentTime);  
 				customerArray[customer].currentSP = selectedSP;
 				//capture the clock time when this customer was assigned a SP
-				customerArray[customer].currentSPQueueStartTime = time();
+				customerArray[customer].currentSPQueueStartTime = currentTime;
 				customerArray[customer].currentServiceTime = expntl(Ts);
 				//Set the service time as a uniformly distributed value rather than exponentially distributed value
 				//customerArray[customer].currentServiceTime = uniform(0.75 * Ts, 1.5 * Ts);
@@ -219,6 +220,7 @@ printf("C_ID\tTime\tF_ID\tInQ\tTrust Score\tActual WT\tAdv WT\t\tProjected WT\tA
 			{
 				customerArray[customer].witnesses[s].sRequester = NON_EXISTENT;
 				customerArray[customer].witnesses[s].waitTimeRating = NON_EXISTENT;
+				customerArray[customer].witnesses[s].waitTime = NON_EXISTENT;
 			}
 			customerArray[customer].currentSPServiceStartTime = 0.0; 
 			customerArray[customer].currentSPQueueStartTime = 0.0;
@@ -345,6 +347,11 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
 		advertisedWaitTime = 0.0167; //minimum wait time is 1 minute
 	}
 	return advertisedWaitTime;
+}
+
+real getProjectedWaitTime(struct ServiceProvider* SP, real advertisedWaitTime)
+{
+
 }
 
 struct ServiceProvider* getLeastBusySP(struct ServiceProvider* SPs, real currentTime)

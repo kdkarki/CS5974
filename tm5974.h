@@ -12,6 +12,7 @@
 
 void myReport();
 real getSPAdvertisedWaitTime();
+real getProjectedWaitTime();
 struct ServiceProvider* getLeastBusySP();
 void addNewSRToQueue();
 void removeSRFromQueue();
