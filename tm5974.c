@@ -15,7 +15,7 @@ int main()
 	struct ServiceRequester customerArray[N_SR];
 	int i,j;
 
-	real te=2000000.0;
+	real te=10000.0;
 	int customer=0;
 	int server=0;
 	int event;
@@ -28,7 +28,7 @@ int main()
         char s[64];
         sprintf(s, "SP%d", i);
         int spid = facility(s, M_SP);
-		serviceProviderArray[i].id = spid;//facility(s, M_SP);
+		serviceProviderArray[i].id = spid;
         serviceProviderArray[i].numberOfSRVisitors = 0;
         serviceProviderArray[i].trustScore = 0.5;
         serviceProviderArray[i].nextAvailTimeSlot = 0.0;
@@ -36,7 +36,7 @@ int main()
         serviceProviderArray[i].isMalicious = 0;
               
         
-        if(i == 3 || i == 6)
+        if(i == 1 || i == 3 || i == 5)// || i == 7 || i == 9)
         {
             serviceProviderArray[i].isMalicious = 1;
         }
@@ -83,7 +83,7 @@ int main()
 			customerArray[j].witnesses[s].waitTimeRating = NON_EXISTENT;
 		}
 		
-		if(j % 4 == 0)
+		if((j % 5 == 0) || (j % 9 == 0))//30% //(j % 5 == 0)//20%//(j % 4 == 0 || j % 5 == 0)//40%
 		{
 			customerArray[j].isMalicious = 1;
 		}
@@ -104,16 +104,32 @@ int main()
 		}
 	}
 
+	int lastReportedTime = 0;
+printf("C_ID\tTime\tF_ID\tInQ\tTrust Score\tActual WT\tAdv WT\t\tProjected WT\tActual-Projected WT Diff\n");
 	while (time()<te)
 	{
 		real timeNow = time();
 		int timeNowInt = (int) timeNow;
-		if(timeNow == 0.00 || ((((int)timeNow) % 2000 == 0) && timeNow > 1500.00 && timeNow > ((real)timeNowInt + 0.996)) || (timeNow < 1000 && (((int)timeNow) % 100 == 0) && timeNow > ((real)timeNowInt + 0.996)))
+		//if(((timeNowInt % 2000 == 0) && timeNow > 1500.00 && timeNowInt > lastReportedTime) || (timeNow < 300.00 && (timeNowInt % 10 == 0) && timeNowInt > lastReportedTime) || (timeNow < 2000.00 && (timeNowInt % 100 == 0) && timeNowInt > lastReportedTime) || timeNow == 0.00)
+		if(timeNow < 10000.00)
 		{
-			printf("************************************ Current Time: %f ************************************\n", time());
-			myReport(serviceProviderArray, customerArray, &highestCentrality, 0);
+			if(customer == 2 && customerArray[customer].currentSP != NON_EXISTENT && (customerArray[customer].currentSP->id == 67 || customerArray[customer].currentSP->id == 45))//SR 2 is non-malicious and SPID 67 is malicious and SPID 45 is non-malicious
+			{
+			lastReportedTime = timeNowInt;
+			//printf("************************************ Current Time: %f ************************************\n", time());
+			//myReport(serviceProviderArray, customerArray, &highestCentrality, 0);
+			real advertisedWT, actualWT, projectedWT, actProjDiff;		
+    			advertisedWT = getSPAdvertisedWaitTime(customerArray[customer].currentSP, timeNow);
+    			actualWT = customerArray[customer].currentSP->nextAvailTimeSlot - timeNow;
+			if(actualWT < 0.016700) { actualWT = 0.0167; }
+			projectedWT = (advertisedWT / customerArray[customer].currentSP->trustScore);
+			actProjDiff = (fabs(projectedWT - actualWT) / actualWT);
+			//printf("C_ID\tTime\tF_ID\tInQ\tTrust Score\tActual WT\tAdv WT\t\tProjected WT\tActual-Projected WT Diff\n");
+			printf("%d\t%f\t%d\t%d\t%f\t%f\t%f\t%f\t%f\n", customer, timeNow, customerArray[customer].currentSP->id, inq(customerArray[customer].currentSP->id), customerArray[customer].currentSP->trustScore, actualWT, advertisedWT, projectedWT, actProjDiff);
 			printf("\n");
+			}
 		}
+		else { break; }
 		cause(&event,&customer);
 		switch(event)
 		{
@@ -135,6 +151,8 @@ int main()
 				//capture the clock time when this customer was assigned a SP
 				customerArray[customer].currentSPQueueStartTime = time();
 				customerArray[customer].currentServiceTime = expntl(Ts);
+				//Set the service time as a uniformly distributed value rather than exponentially distributed value
+				//customerArray[customer].currentServiceTime = uniform(0.75 * Ts, 1.5 * Ts);
 				customerArray[customer].currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(selectedSP, currentTime);
 				//get all the witnesses so that they can be rated later when the service is received
 				int wtIndx;
@@ -207,6 +225,7 @@ int main()
 			customerArray[customer].currentSPWaitTimeRating = NON_EXISTENT;
 			
 			schedule(1,expntl(Ta), customer); /* schedule next arrival time */
+			//schedule(1, uniform((0.5 * Ta),(1.5 * Ta)), customer);//uniform arrival time
 			break;
 		}
 	}
@@ -220,12 +239,19 @@ int main()
 void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* CustomerArray, real* highestCentrality, int isFinalReport)
 {
 	printf("\nSimulation Report\n");
-    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t InQ\t Busy Period\t Next Avail Slot\tTrust Score\n");
+    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t InQ\t Busy Period\t Next Avail Slot\tTrust Score\tAdv Wait Time\tActual Wait Time\n");
     int i;
+    real ct = time();
     for(i = 0; i < N_SP; i++)
     {
     	int fbIndx, fbSRCount;
-    	real posFB, negFB, trustScore;
+    	real posFB, negFB, trustScore, advertisedWT, actualWT;
+    	advertisedWT = getSPAdvertisedWaitTime(&SPArray[i], ct);
+    	actualWT = SPArray[i].nextAvailTimeSlot - ct;
+    	if(actualWT < 0.016700)
+    	{
+    		actualWT = 0.016700;
+    	}
     	posFB = 0.0;
     	negFB = 0.0;
     	trustScore = 0.0;
@@ -245,7 +271,7 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
     	{
     		trustScore = trustScore / fbSRCount;
     	}
-        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t %f \t %f \t\t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, SPArray[i].trustScore);
+        printf("SP%d \t %d \t %d     \t %d \t %f \t %f \t %d \t %f \t %f \t\t %f\t %f\t %f\n", i, SPArray[i].id, SPArray[i].numberOfSRVisitors, SPArray[i].isMalicious, U(SPArray[i].id), Lq(SPArray[i].id), inq(SPArray[i].id), B(SPArray[i].id), SPArray[i].nextAvailTimeSlot, SPArray[i].trustScore, advertisedWT, actualWT);
     }
     if(isFinalReport == 1)
     {
@@ -290,10 +316,6 @@ void myReport(struct ServiceProvider* SPArray, struct ServiceRequester* Customer
 	    	}
 	    	
 	    	printf("%d\t %f\t %f\t %f\t %f\t\t %f\t %f\t\t %d\n", cIndx, CustomerArray[cIndx].positiveFeedback, CustomerArray[cIndx].negativeFeedback, centrality, (centrality / *highestCentrality), CustomerArray[cIndx].honesty, CustomerArray[cIndx].credibility, CustomerArray[cIndx].isMalicious);
-	    	if(cIndx == 500)
-	    	{
-	    		scanf("%s", str);
-	    	}
 	    	
 	    }
 	    printf("Average Malicious SR Honesty: %f\nAverage Non-Malicious SR Honesty: %f\n", (totalMalHonesty/malSRCount), (totalNonMalHonesty/nonMalSRCount));
@@ -614,6 +636,7 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, real* highestCentral
 				if(highestRecommenders[rIndx] == NON_EXISTENT)
 				{
 					highestRecommenders[rIndx] = currentRec;
+					break;
 				}
 				else
 				{
@@ -660,11 +683,6 @@ void updateFeedbackAndWaitTime(struct ServiceRequester* SR, real* highestCentral
 		{
 			newTrustScore = newTrustScore + ((highestRecommenders[rIndx]->sRequester->credibility / SP->netSRCredibility) * highestRecommenders[rIndx]->trustScore);
 		}
-	}
-	if(SP->id == 1 && SP->trustScore > 1.0)
-	{
-		char str[8];
-    	scanf("%s", str);
 	}
 
 	if(newTrustScore > 0.00)
