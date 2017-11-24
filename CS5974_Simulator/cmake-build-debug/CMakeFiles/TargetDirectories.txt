@@ -1,0 +1,4 @@
+C:/Users/kdkarki/CLionProjects/cs5974/cmake-build-debug/CMakeFiles/cs5974.dir
+C:/Users/kdkarki/CLionProjects/cs5974/cmake-build-debug/CMakeFiles/cs5974Output.dir
+C:/Users/kdkarki/CLionProjects/cs5974/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/kdkarki/CLionProjects/cs5974/cmake-build-debug/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,2 @@
+C:\PROGRA~2\CODEBL~1\MinGW\bin\ar.exe qc libcs5974.a  CMakeFiles/cs5974.dir/bmeans.c.obj CMakeFiles/cs5974.dir/smpl.c.obj CMakeFiles/cs5974.dir/stat.c.obj CMakeFiles/cs5974.dir/rand.c.obj CMakeFiles/cs5974.dir/cs5974.c.obj CMakeFiles/cs5974.dir/drand48.c.obj
+C:\PROGRA~2\CODEBL~1\MinGW\bin\ranlib.exe libcs5974.a
