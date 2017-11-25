@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
+    <generated>
+      <config projectName="cs5974_JBR" targetName="cs5974_JBROutput" />
+      <config projectName="cs5974_JBR" targetName="cs5974_JBR" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="bb90f035-722d-42b3-b8d9-ddcaa6a24de6" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+    </list>
+    <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="cs5974_JBR.c" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/cs5974_JBR.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4140">
+              <caret line="1424" column="1" lean-forward="true" selection-start-line="1424" selection-start-column="1" selection-end-line="1424" selection-end-column="1" />
+              <folding>
+                <element signature="e#0#17#0" expanded="true" />
+                <element signature="e#239#1236#0" expanded="false" />
+                <element signature="e#1238#1927#0" expanded="false" />
+                <element signature="e#5583#6327#0" expanded="false" />
+                <element signature="e#6329#9260#0" expanded="false" />
+                <element signature="e#9262#10369#0" expanded="false" />
+                <element signature="e#10375#10850#0" expanded="false" />
+                <element signature="e#10856#15565#0" expanded="false" />
+                <element signature="e#15567#17729#0" expanded="false" />
+                <element signature="e#19883#28138#0" expanded="false" />
+                <element signature="e#28140#30403#0" expanded="false" />
+                <element signature="e#28140#33632#0" expanded="false" />
+                <element signature="e#33634#35350#0" expanded="false" />
+                <element signature="e#35352#47054#0" expanded="false" />
+                <element signature="e#41711#41799#0" expanded="false" />
+                <element signature="e#43736#44003#0" expanded="false" />
+                <element signature="e#45029#47052#0" expanded="false" />
+                <element signature="e#47056#47585#0" expanded="false" />
+                <element signature="e#47587#49480#0" expanded="false" />
+                <element signature="e#49482#51431#0" expanded="false" />
+                <element signature="e#51433#53590#0" expanded="false" />
+                <element signature="e#53592#57353#0" expanded="false" />
+                <element signature="e#59247#59400#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cs5974_JBR.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cs5974_JBR.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="704">
+              <caret line="90" column="119" lean-forward="false" selection-start-line="90" selection-start-column="119" selection-end-line="90" selection-end-column="119" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="drand48.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/drand48.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="20">
+              <caret line="116" column="58" lean-forward="false" selection-start-line="116" selection-start-column="58" selection-end-line="116" selection-end-column="58" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/CMakeLists.txt" />
+        <option value="$PROJECT_DIR$/cs5974_JBR.h" />
+        <option value="$PROJECT_DIR$/cs5974_JBR.c" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="7">
+    <option name="x" value="-7" />
+    <option name="width" value="974" />
+    <option name="height" value="1167" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="cs5974_JBR" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="JosangBetaReputationSimulator" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="cs5974_JBR" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="JosangBetaReputationSimulator" type="462c0819:PsiDirectoryNode" />
+              <item name="cmake-build-debug" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.cs5974_JBROutput">
+    <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" EXPLICIT_BUILD_TARGET_NAME="all">
+      <envs />
+    </configuration>
+    <configuration name="cs5974_JBR" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="cs5974_JBR" TARGET_NAME="cs5974_JBR" CONFIG_NAME="Debug">
+      <envs />
+    </configuration>
+    <configuration name="cs5974_JBROutput" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="cs5974_JBR" TARGET_NAME="cs5974_JBROutput" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="cs5974_JBR" RUN_TARGET_NAME="cs5974_JBROutput">
+      <envs />
+    </configuration>
+    <list size="3">
+      <item index="0" class="java.lang.String" itemvalue="Application.Build All" />
+      <item index="1" class="java.lang.String" itemvalue="Application.cs5974_JBR" />
+      <item index="2" class="java.lang.String" itemvalue="Application.cs5974_JBROutput" />
+    </list>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bb90f035-722d-42b3-b8d9-ddcaa6a24de6" name="Default" comment="" />
+      <created>1511566164422</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1511566164422</updated>
+      <workItem from="1511566165678" duration="2334000" />
+      <workItem from="1511631251881" duration="1969000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="4303000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1176" extended-state="7" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36594543" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32925683" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32925683" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39981186" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/cs5974_JBR.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#17#0" expanded="true" />
+            <element signature="e#239#1236#0" expanded="false" />
+            <element signature="e#1238#1927#0" expanded="false" />
+            <element signature="e#5583#6327#0" expanded="false" />
+            <element signature="e#6329#9260#0" expanded="false" />
+            <element signature="e#9262#10369#0" expanded="false" />
+            <element signature="e#10375#10850#0" expanded="false" />
+            <element signature="e#10856#15565#0" expanded="false" />
+            <element signature="e#15567#17729#0" expanded="false" />
+            <element signature="e#19883#28138#0" expanded="false" />
+            <element signature="e#28140#30403#0" expanded="false" />
+            <element signature="e#28140#33632#0" expanded="false" />
+            <element signature="e#33634#35350#0" expanded="false" />
+            <element signature="e#35352#47054#0" expanded="false" />
+            <element signature="e#41711#41799#0" expanded="false" />
+            <element signature="e#43736#44003#0" expanded="false" />
+            <element signature="e#45029#47052#0" expanded="false" />
+            <element signature="e#47056#47585#0" expanded="false" />
+            <element signature="e#47587#49480#0" expanded="false" />
+            <element signature="e#49482#51431#0" expanded="false" />
+            <element signature="e#51433#53590#0" expanded="false" />
+            <element signature="e#53592#57353#0" expanded="false" />
+            <element signature="e#59247#59400#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cs5974_JBR.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="140">
+          <caret line="7" column="19" lean-forward="false" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/drand48.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cmake-build-debug/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="8" column="37" lean-forward="false" selection-start-line="8" selection-start-column="37" selection-end-line="8" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cs5974_JBR.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="704">
+          <caret line="90" column="119" lean-forward="false" selection-start-line="90" selection-start-column="119" selection-end-line="90" selection-end-column="119" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/drand48.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="20">
+          <caret line="116" column="58" lean-forward="false" selection-start-line="116" selection-start-column="58" selection-end-line="116" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cs5974_JBR.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4140">
+          <caret line="1424" column="1" lean-forward="true" selection-start-line="1424" selection-start-column="1" selection-end-line="1424" selection-end-column="1" />
+          <folding>
+            <element signature="e#0#17#0" expanded="true" />
+            <element signature="e#239#1236#0" expanded="false" />
+            <element signature="e#1238#1927#0" expanded="false" />
+            <element signature="e#5583#6327#0" expanded="false" />
+            <element signature="e#6329#9260#0" expanded="false" />
+            <element signature="e#9262#10369#0" expanded="false" />
+            <element signature="e#10375#10850#0" expanded="false" />
+            <element signature="e#10856#15565#0" expanded="false" />
+            <element signature="e#15567#17729#0" expanded="false" />
+            <element signature="e#19883#28138#0" expanded="false" />
+            <element signature="e#28140#30403#0" expanded="false" />
+            <element signature="e#28140#33632#0" expanded="false" />
+            <element signature="e#33634#35350#0" expanded="false" />
+            <element signature="e#35352#47054#0" expanded="false" />
+            <element signature="e#41711#41799#0" expanded="false" />
+            <element signature="e#43736#44003#0" expanded="false" />
+            <element signature="e#45029#47052#0" expanded="false" />
+            <element signature="e#47056#47585#0" expanded="false" />
+            <element signature="e#47587#49480#0" expanded="false" />
+            <element signature="e#49482#51431#0" expanded="false" />
+            <element signature="e#51433#53590#0" expanded="false" />
+            <element signature="e#53592#57353#0" expanded="false" />
+            <element signature="e#59247#59400#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

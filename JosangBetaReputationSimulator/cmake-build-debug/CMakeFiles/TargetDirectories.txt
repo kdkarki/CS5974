@@ -1,0 +1,4 @@
+C:/Users/kdkarki/Documents/workspace/github/CS5974/JosangBetaReputationSimulator/cmake-build-debug/CMakeFiles/cs5974_JBR.dir
+C:/Users/kdkarki/Documents/workspace/github/CS5974/JosangBetaReputationSimulator/cmake-build-debug/CMakeFiles/cs5974_JBROutput.dir
+C:/Users/kdkarki/Documents/workspace/github/CS5974/JosangBetaReputationSimulator/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/kdkarki/Documents/workspace/github/CS5974/JosangBetaReputationSimulator/cmake-build-debug/CMakeFiles/rebuild_cache.dir

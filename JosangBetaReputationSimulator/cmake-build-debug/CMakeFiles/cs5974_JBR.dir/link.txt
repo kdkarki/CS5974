@@ -1,0 +1,2 @@
+C:\PROGRA~2\CODEBL~1\MinGW\bin\ar.exe qc libcs5974_JBR.a  CMakeFiles/cs5974_JBR.dir/bmeans.c.obj CMakeFiles/cs5974_JBR.dir/smpl.c.obj CMakeFiles/cs5974_JBR.dir/stat.c.obj CMakeFiles/cs5974_JBR.dir/rand.c.obj CMakeFiles/cs5974_JBR.dir/cs5974_JBR.c.obj CMakeFiles/cs5974_JBR.dir/drand48.c.obj
+C:\PROGRA~2\CODEBL~1\MinGW\bin\ranlib.exe libcs5974_JBR.a
