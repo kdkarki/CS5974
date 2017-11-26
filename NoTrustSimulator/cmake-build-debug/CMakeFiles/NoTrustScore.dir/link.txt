@@ -1,0 +1,2 @@
+C:\PROGRA~2\CODEBL~1\MinGW\bin\ar.exe qc libNoTrustScore.a  CMakeFiles/NoTrustScore.dir/bmeans.c.obj CMakeFiles/NoTrustScore.dir/smpl.c.obj CMakeFiles/NoTrustScore.dir/stat.c.obj CMakeFiles/NoTrustScore.dir/rand.c.obj CMakeFiles/NoTrustScore.dir/CS5974_NTS.c.obj CMakeFiles/NoTrustScore.dir/drand48.c.obj
+C:\PROGRA~2\CODEBL~1\MinGW\bin\ranlib.exe libNoTrustScore.a
