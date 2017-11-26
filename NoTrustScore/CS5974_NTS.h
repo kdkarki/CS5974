@@ -1,8 +1,0 @@
-//
-// Created by kdkarki on 11/25/2017.
-//
-
-#ifndef NOTRUSTSCORE_CS5974_NTS_H
-#define NOTRUSTSCORE_CS5974_NTS_H
-
-#endif //NOTRUSTSCORE_CS5974_NTS_H
