@@ -1,9 +1,14 @@
 #include <math.h>
 #include <mem.h>
+#include <stdlib.h>
 #include "smpl.h"
 #include "cs5974_NTS.h"
 
-#define	currentReportNumber	0
+int	currentReportNumber	= 7;
+int maliciousPercent = 30;
+double Param_R = 1.0;
+
+int totalSPVisitsByGoodSRs, totalMaliciousSPVisitsByGoodSRs;
 
 struct ServiceProvider providerArray[N_SP];
 struct ServiceRequester customerArray[N_SR];
@@ -39,14 +44,47 @@ void setupMaliciousSPSR()
     }
 }
 
-int main()
+/**
+ * First argument is figure/report number to run. Accepted Values: 7 - 8
+ * Second argument is malicious percentage and is optional. This is 30% by default. Accepted values: 0%, 10%, 30%, 50%
+ * Third argument is total running time as double value. This is default to 1010.00 hrs
+ * Fourth argument is risk factor. Accepted values: 1.0, 0.75, 0.5
+ * @param argc
+ * @param argv
+ * @return
+ */
+int main(int argc, char *argv[])
 {
+    printf("\n\n******************************************************\n\nStarting the simulation for CS5974\nNon-Trust Based Simulation\n\n******************************************************\n\n");
+    
+    real te = 1015.00; //this is end time for simulation
+
+    if(argc > 1)
+    {
+        currentReportNumber = atoi(argv[1]);
+    }
+    if(argc > 2)
+    {
+        maliciousPercent = atoi(argv[2]);
+    }
+
+    if(argc > 3)
+    {
+        sscanf(argv[3], "%lf", &te);
+    }
+
+    if(argc > 4)
+    {
+        sscanf(argv[4], "%lf", &Param_R);
+    }
+
+    printf("Simulation configuration:\n\tReport (figure) #: %d\n\tMaliciousness %% (P_m): %d\n\tTotal Simulation Time (hrs): %.2f\n\tRisk Factor (R_f): %.2f\n\n",
+           currentReportNumber, maliciousPercent, te, Param_R);
     srand(time(NULL));
 
     real report1LastPrinted;
     report1LastPrinted = -5.0;
 
-    real te = 1015.00; //this is end time for simulation
     smpl(0,"5974"); //initialize smpl simulation
     //trace(2);
     setupServiceProviders();
@@ -56,20 +94,11 @@ int main()
     //initial report setup
     switch(currentReportNumber)
     {
-        case 1:
-            reportingCustomer = 1;
-            printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t InQ\t Busy Period\t Next Avail Slot\tTrust Score\tAdv Wait Time\tActual Wait Time\tProjected Wait Time\tTotalSystemVisitors\tCurrent Time\n");
-            break;
-        case 2:
+        case 7:
+            printf("Current Time\tTotal SP Visits Since Last Count\t Total Malicious SP Visits Since Last Count\tMalicious SP Visit Percentage\tTotal SP Visits By Good SRs\tTotal Malicious SP Visits by Good SRs\n");
 
             break;
-        case 3:
-
-            break;
-        case 4:
-
-            break;
-        case 5:
+        case 8:
 
             break;
         default:
@@ -84,24 +113,17 @@ int main()
         real currentTime = time();
         switch(currentReportNumber)
         {
-            case 1:
-                figure1Report(&report1LastPrinted, currentTime);
+            case 7:
+                figure7Report(&report1LastPrinted, currentTime);
                 break;
-            case 2:
-
-                break;
-            case 3:
-
-                break;
-            case 4:
-
-                break;
-            case 5:
-
+            case 8:
+                if(event == 2 && customerArray[customer].isMalicious == 0) {
+                    figure8Report(&report1LastPrinted, currentTime);
+                }
                 break;
             default:
-                testReport(&report1LastPrinted, currentTime);
-                break;
+                printf("Enter either 7 or 8 for the report to be generated.");
+                return -1;
         }
         cause(&event, &customer);
         switch(event)
@@ -124,7 +146,15 @@ int main()
                 {
                     //capture the clock time when this customer received the service
                     customerArray[customer].currentSPServiceStartTime = time();
-
+                    for(int i = 0; i < N_SP; i++)
+                    {
+                        if(customerArray[customer].currentSP->id == customerArray[customer].serviceExperiences[i].sProvider->id)
+                        {
+                            customerArray[customer].serviceExperiences[i].lastServiceActualWaitTime = (customerArray[customer].currentSPServiceStartTime - customerArray[customer].currentSPQueueStartTime);
+                            customerArray[customer].serviceExperiences[i].lastServiceAdvertisedWaitTime = customerArray[customer].currentSPAdvertisedWaitTime;
+                            break;
+                        }
+                    }
                     schedule(3,customerArray[customer].currentServiceTime,customer);
                 }
                 break;
@@ -189,6 +219,8 @@ void setupServiceRequesters()
         for(spIndx = 0; spIndx < N_SP; spIndx++)
         {
             customerArray[j].serviceExperiences[spIndx].totalVisits = 0;
+            customerArray[j].serviceExperiences[spIndx].lastServiceActualWaitTime = -1.0;
+            customerArray[j].serviceExperiences[spIndx].lastServiceAdvertisedWaitTime = -1.0;
             customerArray[j].serviceExperiences[spIndx].sProvider = &providerArray[spIndx];
         }
 
@@ -368,69 +400,87 @@ void printBasicFacilityInfo()
     }
 }
 
-void testReport(real *report1LastPrinted, real currentTime)
+void figure7Report(real* lastReportedTime, real currentTime)
 {
-    if(event != 3){
-        return;
-    }
-    if((*report1LastPrinted <= (currentTime + 5.0))) {
-        *report1LastPrinted += 5;
-        printf("SRId\tSPId\tFId\tVstrs\tMal\tInQ\tBusy\tNxtAvl\tAdvr\tT Vsts\tCurrT\tTstSRVsts\n");
+    if((*lastReportedTime <= (currentTime + 5.0))) {
+        *lastReportedTime += 5;
 
-        int totalVisitors;
-        totalVisitors = 0;
-        for(int i = 0; i < N_SP; i++)
+        //iterate through each SR and find total SP visits and update totalSPVisitsByGoodSRs and totalMaliciousSPVisitsByGoodSRs
+        int latestTotalSPVisits = 0, latestTotalMaliciousSPVisits = 0;
+
+        for(int sr = 0; sr <N_SR; sr++)
         {
-            totalVisitors += providerArray[i].totalVisitorCount;
-        }
-        for(int testCustomerId = 0; testCustomerId < N_SR; testCustomerId++) {
-            if(testCustomerId < 725 || testCustomerId > 727){
+            if(customerArray[sr].isMalicious == 1)
+            {
                 continue;
             }
-            for (int i = 0; i < N_SP; i++) {
-                int testSRVisits = 0;
-                //Service experience history will be displayed under last service rating
-                real advertisedWT;
-                advertisedWT = getSPAdvertisedWaitTime(&providerArray[i], currentTime);
-                testSRVisits =  customerArray[testCustomerId].serviceExperiences[i].totalVisits;
-                printf("SR%d\tSP%d\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.2f\t%d\t%.2f\t%d\n", testCustomerId,
-                       i, providerArray[i].id, providerArray[i].totalVisitorCount, providerArray[i].isMalicious,
-                       inq(providerArray[i].id), B(providerArray[i].id), providerArray[i].nextAvailTime,
-                       advertisedWT, totalVisitors, currentTime, testSRVisits);
+            for(int sp = 0; sp < N_SP; sp++)
+            {
+                if(customerArray[sr].serviceExperiences[sp].totalVisits > 0)
+                {
+                    latestTotalSPVisits += customerArray[sr].serviceExperiences[sp].totalVisits;
+                    if(customerArray[sr].serviceExperiences[sp].sProvider->isMalicious == 1)
+                    {
+                        latestTotalMaliciousSPVisits += customerArray[sr].serviceExperiences[sp].totalVisits;
+                    }
+                }
             }
         }
-        printf("********************************************\n");
+
+        int totalSPVisitsSinceLastCount = latestTotalSPVisits - totalSPVisitsByGoodSRs;
+        int totalMaliciousSPVisitsSinceLastCount = latestTotalMaliciousSPVisits - totalMaliciousSPVisitsByGoodSRs;
+
+        real maliciouSPVisitPercentage = 0.0;
+        if(totalMaliciousSPVisitsSinceLastCount > 0) {
+            maliciouSPVisitPercentage =  (totalMaliciousSPVisitsSinceLastCount * 100.00) / (real)totalSPVisitsSinceLastCount;
+        }
+
+        totalSPVisitsByGoodSRs = latestTotalSPVisits;
+        totalMaliciousSPVisitsByGoodSRs = latestTotalMaliciousSPVisits;
+
+        printf("%.2f\t%d\t%d\t%.2f\t%d\t%d\n",
+               currentTime, totalSPVisitsSinceLastCount, totalMaliciousSPVisitsSinceLastCount,
+               maliciouSPVisitPercentage, totalSPVisitsByGoodSRs, totalMaliciousSPVisitsByGoodSRs);
     }
 }
 
-void figure1Report(real* lastReportedTime, real currentTime)
+void figure8Report(real *report1LastPrinted, real currentTime)
 {
-    if(*lastReportedTime <= (currentTime + 5.0))
+    //Display figure 4 report
+    if((*report1LastPrinted <= (currentTime + 5.0)))
     {
+        *report1LastPrinted += 5;
+
+        printf("SRId\tSPId\tFId\tVstrs\tMal\tInQ\tBusy\tAdvr\tActl\tT Vsts\tCurrT\tLast Visited SR\n");
+
         int totalVisitors;
+        char serviceExp[150];
         totalVisitors = 0;
-        *lastReportedTime += 5;
         for(int i = 0; i < N_SP; i++)
         {
             totalVisitors += providerArray[i].totalVisitorCount;
         }
-        for(int i = 0; i < N_SP; i++)
-        {
-            int wtCount;
-            wtCount = 0;
+        int testCustomerId = customer;
+        for (int i = 0; i < N_SP; i++) {
+            int fbIndx, fbSRCount;
             real trustScore, advertisedWT, actualWT, projectedWaitTime;
             advertisedWT = getSPAdvertisedWaitTime(&providerArray[i], currentTime);
             actualWT = providerArray[i].nextAvailTime - currentTime;
-            if(actualWT < 0.016700)
-            {
+            if (actualWT < 0.016700) {
                 actualWT = 0.016700;
             }
-            printf("SP%d\t%d\t%d\t%d\t%.2f\t%.2f\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%.2f\n",
+
+            int lastVisitedSP = -1;
+            if(customerArray[testCustomerId].currentSP != NULL)
+            {
+                lastVisitedSP = customerArray[testCustomerId].currentSP->id;
+            }
+            printf("SR%d\tSP%d\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.2f\t%d\t%.2f\t%d\n", testCustomerId,
                    i, providerArray[i].id, providerArray[i].totalVisitorCount, providerArray[i].isMalicious,
-                   U(providerArray[i].id), Lq(providerArray[i].id), inq(providerArray[i].id), B(providerArray[i].id),
-                   providerArray[i].nextAvailTime, providerArray[i].trustScore, advertisedWT, actualWT,
-                   projectedWaitTime, totalVisitors, currentTime);
+                   inq(providerArray[i].id), B(providerArray[i].id),
+                   advertisedWT, actualWT, totalVisitors, currentTime, lastVisitedSP);
         }
+        printf("********************************************\n");
     }
 }
 
@@ -438,5 +488,4 @@ void myReport(int isFinalReport)
 {
     printf("\nSimulation Report\n");
     printBasicFacilityInfo();
-    //testReport();
 }

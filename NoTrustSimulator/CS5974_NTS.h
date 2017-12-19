@@ -5,7 +5,7 @@
 #define Ta	10.0	//service requester arrival time
 #define Ts	1.0		//service provider service time
 //#define T_Margin	0.20 //threshold for wait time to be considered inaccurate
-#define Param_R	1.0 //the wait time offset reported by a malicious SP
+//#define Param_R	1.0 //the wait time offset reported by a malicious SP
 //#define N_Rec	5 //the number of top recommenders, SR, used to calculate SP trust score
 //#define H_Thres 0.6 //honesty threshold
 #define NON_EXISTENT -1
@@ -14,6 +14,8 @@
 struct ServiceExperience //Represents service experienced by an SR from an SP
 {
     int totalVisits;
+    real lastServiceActualWaitTime; //the actual wait time experienced by SR during the last visit to the SP. This value will be used by SR to calculate projected wait time
+    real lastServiceAdvertisedWaitTime; //the wait time advertised by the SR as the last visit wait time at the SP. This will be same as lasServiceActualWaitTime for non-malicious SP but different for malicious SP
     struct ServiceProvider* sProvider;
 };
 
@@ -48,8 +50,8 @@ struct ServiceRequester //Represents a service requester (customer)
 
 //methods
 void myReport(int isFinalReport);
-void testReport(real *report1LastPrinted, real currentTime);
-void figure1Report(real* lastReportedTime, real currentTime);
+void figure7Report(real* lastReportedTime, real currentTime);
+void figure8Report(real *report1LastPrinted, real currentTime);
 void setupServiceProviders();
 void setupServiceRequesters();
 void setupMaliciousSPSR();
