@@ -5,9 +5,10 @@
 #define Ta	10.0	//service requester arrival time
 #define Ts	1.0		//service provider service time
 //#define T_Margin	0.20 //threshold for wait time to be considered inaccurate
-#define Param_R	1.0 //the wait time offset reported by a malicious SP
+//#define Param_R 1.0 //the wait time offset reported by a malicious SP
 #define N_Rec	5 //the number of top recommenders, SR, used to calculate SP trust score
 #define H_Thres 0.6 //honesty threshold
+#define LastExpTime_Thres   0.0835
 #define NON_EXISTENT -1
 #define ARR_SIZE(arr) (sizeof((arr)) / sizeof((arr[0])))
 
@@ -98,3 +99,6 @@ struct ServiceProvider* getLeastBusySP(struct ServiceRequester* servRequester, r
 struct ServiceProvider *getMostTrustworthySP(struct ServiceRequester *servRequester);
 struct ServiceProvider *getLeastBusySPAmongMostTrustworthySP(struct ServiceRequester *servRequester, real currentTime);
 void cleanupServiceRequesterBeforeLeaving(struct ServiceRequester* servRequester);
+void figure3Report(real *report1LastPrinted, real currentTime);
+void figure4Report(real *report1LastPrinted, real currentTime);
+void figure5And6Report(real *report1LastPrinted, real currentTime);
