@@ -1,67 +1,129 @@
 #include <math.h>
 #include <mem.h>
+#include <stdlib.h>
 #include "smpl.h"
 #include "cs5974_JBR.h"
 
-#define	currentReportNumber	0
+int	currentReportNumber = 7;
+char decisionPolicy[4];
+int maliciousPercent = 30;
+double Param_R = 1.0;
 
 struct ServiceProvider providerArray[N_SP];
 struct ServiceRequester customerArray[N_SR];
-int event, customer, reportingCustomer;
-
-int quickTest(){
-    int result = 0;
-    if(time() > 40.00){
-        int totalVisitingSRs = 0;
-        for(int indx = 0; indx < N_SR; indx++){
-            if(providerArray[3].feedbacks[indx].totalFeedback > 0){
-                totalVisitingSRs++;
-                printf("customer: %d, Malicious: %d, Trust Score: %f, total +ve FB: %f, total NegativeFB: %f, Last Service Rating: %f, Exp T Visits: %d, total Visits: %d\n",
-                       indx, customerArray[indx].isMalicious, providerArray[3].feedbacks[indx].trustScore,
-                       providerArray[3].feedbacks[indx].positiveFeedback, providerArray[3].feedbacks[indx].negativeFeedback,
-                       customerArray[indx].serviceExperiences[3].lastServiceRating,
-                       customerArray[indx].serviceExperiences[3].totalVisits, providerArray[3].feedbacks[indx].totalFeedback);
-            }
-        }
-        printf("Total visiting SRs: %d\n", totalVisitingSRs);
-        result = -1;
-    }
-    return result;
-}
+int event, customer, reportingCustomer, totalSPVisitsByGoodSRs, totalMaliciousSPVisitsByGoodSRs;
 
 void setupMaliciousSPSR()
 {
-    int indxSP, indxSR;
-
-    for(indxSP = 0; indxSP < N_SP; indxSP++)
+    if(maliciousPercent == 0)
     {
-        if(indxSP == 1 || indxSP == 3 || indxSP == 5)// || indxSP == 7 || indxSP == 9)
-        {
-            providerArray[indxSP].isMalicious = 1;
-        }
+        return;
+    }
+    //SP1 is malicious for all cases
+    providerArray[1].isMalicious = 1;
+    providerArray[2].isMalicious = 0;
+    if(maliciousPercent > 10) {
+        providerArray[3].isMalicious = 1;
+    }
+    else{
+        providerArray[3].isMalicious = 0;
+    }
+    providerArray[4].isMalicious = 0;
+    if(maliciousPercent > 10) {
+        providerArray[5].isMalicious = 1;
+    }
+    else{
+        providerArray[5].isMalicious = 0;
+    }
+    providerArray[6].isMalicious = 0;
+    if(maliciousPercent == 50) {
+        providerArray[7].isMalicious = 1;
+    }
+    else{
+        providerArray[7].isMalicious = 0;
+    }
+    providerArray[8].isMalicious = 0;
+    if(maliciousPercent == 50) {
+        providerArray[9].isMalicious = 1;
+    }
+    else{
+        providerArray[9].isMalicious = 0;
     }
 
-    for(indxSR = 0; indxSR < N_SR; indxSR++)
+    for(int indxSR = 0; indxSR < N_SR; indxSR++)
     {
-        if((indxSR % 5 == 0) || (indxSR % 9 == 0))//(indxSR % 2 == 0) || (indxSR % 5 == 0)60%//(indxSR % 5 == 0) || (indxSR % 9 == 0)//30% //(indxSR % 5 == 0)//20%//(indxSR % 4 == 0 || indxSR % 5 == 0)//40%
+        if(maliciousPercent == 10)
         {
-            customerArray[indxSR].isMalicious = 1;
+            if(indxSR % 10 == 0)
+            {
+                customerArray[indxSR].isMalicious = 1;
+            }
         }
-        else
+        else if(maliciousPercent == 30)
         {
-            customerArray[indxSR].isMalicious = 0;
+            if((indxSR % 5 == 0) || (indxSR % 9 == 0))
+            {
+                customerArray[indxSR].isMalicious = 1;
+            }
         }
+        else if(maliciousPercent == 50)
+        {
+            if(indxSR % 2 == 0)
+            {
+                customerArray[indxSR].isMalicious = 1;
+            }
+        }
+        //(indxSR % 2 == 0) || (indxSR % 5 == 0)60%//(indxSR % 5 == 0) || (indxSR % 9 == 0)//30% //(indxSR % 5 == 0)//20%//(indxSR % 4 == 0 || indxSR % 5 == 0)//40%
     }
 }
 
-int main()
+//
+//First argument is figure/report number to run. Accepted Values: 1 - 8
+//Second argument is decision policy to use. Accepted values: LB: Least Busy, MI: Most Trustworthy, LBMT: Least busy among most trustworthy
+//Third argument is malicious percentage and is optional. This is 30% by default. Accepted values: 0%, 10%, 30%, 50%
+/**
+ * Expects 4 arguments.
+ * First argument is figure/report number to run. Accepted Values: 7, 8
+ * Second argument is malicious percentage and is optional. This is 30% by default. Accepted values: 0%, 10%, 30%, 50%
+ * Third argument is total running time as double value. 250hrs by default
+ * Fourth argument is
+ * @param argc Argument count
+ * @param argv Argument Values as array of string/char[]
+ * @return
+ */
+int main(int argc, char *argv[] )
 {
+    printf("\n\n******************************************************\n\nStarting the simulation for CS5974\nJosang's Beta Reputation \n\n******************************************************\n\n");
     srand(time(NULL));
+    real te = 250.00; //this is end time for simulation
+
+    if(argc > 1)
+    {
+        currentReportNumber = atoi(argv[1]);
+    }
+    if(argc > 2)
+    {
+        maliciousPercent = atoi(argv[2]);
+    }
+
+    if(argc > 3)
+    {
+        sscanf(argv[3], "%lf", &te);
+    }
+
+    if(argc > 4)
+    {
+        sscanf(argv[4], "%lf", &Param_R);
+    }
+
+    printf("Simulation configuration:\n\tReport (figure) #: %d\n\tMaliciousness %% (P_m): %d\n\tTotal Simulation Time (hrs): %.2f\n\tRisk Factor (R_f): %.2f\n\n",
+           currentReportNumber,maliciousPercent, te, Param_R);
 
     real report1LastPrinted;
     report1LastPrinted = -5.0;
+    totalSPVisitsByGoodSRs = 0;
+    totalMaliciousSPVisitsByGoodSRs = 0;
 
-    real te = 1015.00; //this is end time for simulation
     smpl(0,"5974"); //initialize smpl simulation
     //trace(2);
     setupServiceProviders();
@@ -71,20 +133,10 @@ int main()
     //initial report setup
     switch(currentReportNumber)
     {
-        case 1:
-            reportingCustomer = 1;
-            printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t InQ\t Busy Period\t Next Avail Slot\tTrust Score\tAdv Wait Time\tActual Wait Time\tProjected Wait Time\tTotalSystemVisitors\tCurrent Time\n");
+        case 7:
+            printf("Current Time\tSP Visits Since Last Count\tMalicious SP Visits Since Last Count\tMalicious SP Visit Percentage\tTotal SP Visits By Good SRs\tTotal Malicious SP Visits by Good SR\n");
             break;
-        case 2:
-
-            break;
-        case 3:
-
-            break;
-        case 4:
-
-            break;
-        case 5:
+        case 8:
 
             break;
         default:
@@ -93,29 +145,18 @@ int main()
 
     while(time() < te)
     {
-        /*if(quickTest() == -1) {
-            return -1;
-        }*/
         real currentTime = time();
         switch(currentReportNumber)
         {
-            case 1:
-                figure1Report(&report1LastPrinted, currentTime);
+            case 7:
+                figure7Report(&report1LastPrinted, currentTime);
                 break;
-            case 2:
-
-                break;
-            case 3:
-
-                break;
-            case 4:
-
-                break;
-            case 5:
-
+            case 8:
+                if(event == 2 && customerArray[customer].isMalicious == 0) {
+                    figure8Report(&report1LastPrinted, currentTime);
+                }
                 break;
             default:
-                testReport(&report1LastPrinted, currentTime);
                 break;
         }
         cause(&event, &customer);
@@ -132,9 +173,7 @@ int main()
                 if (customerArray[customer].currentSP == NULL) // the customer has just arrived and has not selected a SP for service
                 {
                     real currTime = time();
-                    //struct ServiceProvider *selectedSP = getLeastBusySP(&customerArray[customer], currTime);
-                    //struct ServiceProvider *selectedSP = getMostTrustworthySP(&customerArray[customer]);
-                    struct ServiceProvider *selectedSP = getLeastBusySPAmongMostTrustworthySP(&customerArray[customer], currentTime);
+                    struct ServiceProvider *selectedSP =  getLeastBusySPAmongMostTrustworthySP(&customerArray[customer], currentTime);
                     setSelectedServiceProvider(&customerArray[customer], selectedSP, currTime);
                 }
                 if (request(customerArray[customer].currentSP->id,customer,0)==0)
@@ -144,6 +183,11 @@ int main()
 
                     //update the feedback to SP and SR based on the wait time
                     updateServiceExperience(&customerArray[customer]);
+
+                    /*if(customerArray[customer].isMalicious == 0 && customerArray[customer].currentSP->isMalicious == 0)
+                    {
+                        testReport(&report1LastPrinted, currentTime);
+                    }*/
 
                     schedule(3,customerArray[customer].currentServiceTime,customer);
                 }
@@ -172,8 +216,6 @@ void setupServiceProviders()
         sprintf(s, "SP%d", i);
         int spid = facility(s, M_SP);
         providerArray[i].id = spid;
-        providerArray[i].totalNegativeFeedbacks = 0;
-        providerArray[i].totalPositiveFeedbacks = 0;
         providerArray[i].trustScore = 0.5;
         providerArray[i].totalVisitorCount = 0;
         providerArray[i].nextAvailTime = 0.0;
@@ -236,8 +278,6 @@ void setupServiceRequesters()
             providerArray[spIndx].feedbacks[j].trustScore = 0.5;
             providerArray[spIndx].feedbacks[j].positiveFeedback = 1.0;
             providerArray[spIndx].feedbacks[j].negativeFeedback = 1.0;
-            providerArray[spIndx].totalNegativeFeedbacks++;
-            providerArray[spIndx].totalPositiveFeedbacks++;
         }
 
     }
@@ -299,231 +339,6 @@ real getSPAdvertisedWaitTime(struct ServiceProvider* SP, real currentTime)
     return advertisedWaitTime;
 }
 
-real getProjectedWaitTime(struct ServiceProvider* SP, struct ServiceRequester* servRequester, real advertisedWaitTime)
-{
-    int witnessCount, srHasPriorExperienceWithSP;
-    witnessCount = 0;
-    srHasPriorExperienceWithSP = 0;
-    struct Witness witnessArray[N_SR];
-
-    for(int s =0; s < N_SP; s++){
-        if(servRequester->serviceExperiences[s].sProvider->id == SP->id){
-            if(servRequester->serviceExperiences[s].lastServiceRating > -1.0){
-                srHasPriorExperienceWithSP = 1;
-            }
-            break;
-        }
-    }
-    getrecommendersForSR(servRequester, SP, witnessArray, &witnessCount);
-    if(witnessCount > N_SR){
-        printf("***********************ERROR****************************\n***Witness count greater than N_SR***\n*****************************************\n");
-    }
-
-    for(int v = 0; v < N_Rec; v++){
-        if(witnessArray[v].sRequester != NULL && servRequester->feedbacks[witnessArray[v].sRequester->id].trustScore < H_Thres){
-            witnessArray[v].sRequester = NULL;
-        }
-    }
-
-    //after determining all witnesses, use the wait time of the top N_Rec witnesses to project the SP wait time
-    real netCredibility, projWaitTimeByWitnesses, projectedWaitTime;
-    netCredibility = 0.0;
-    projWaitTimeByWitnesses = -1.0;
-    if(srHasPriorExperienceWithSP == 1 || (witnessCount > 0 && witnessArray[0].sRequester != NULL)) {
-        projWaitTimeByWitnesses = 0.0;
-        // 1. Calculate sum of credibility of top N_Rec witnesses
-        int n_rec_UpperLimit;
-        n_rec_UpperLimit = N_Rec;
-        if (srHasPriorExperienceWithSP == 1) {
-            netCredibility += 1.0;//the inquiring SRs credibility is 1
-            n_rec_UpperLimit = (N_Rec - 1);
-        }
-        for (int rIndx = 0; rIndx < n_rec_UpperLimit && rIndx < witnessCount; rIndx++) {
-            if (witnessArray[rIndx].sRequester != NULL && servRequester->feedbacks[witnessArray[rIndx].sRequester->id].trustScore >= H_Thres) {
-                netCredibility += servRequester->feedbacks[witnessArray[rIndx].sRequester->id].trustScore;
-            }
-        }
-        //2. Calculate Equation 7: Projected wait time based on witnesses
-        if (srHasPriorExperienceWithSP == 1) {
-            for(int s =0; s < N_SP; s++) {
-                if (servRequester->serviceExperiences[s].sProvider->id == SP->id) {
-                    projWaitTimeByWitnesses += ((1.0 / netCredibility) *
-                                                servRequester->serviceExperiences[s].lastServiceActualWaitTime);
-                    break;
-                }
-            }
-        }
-        if (netCredibility > 0.0) {
-            for (int rIndx = 0; rIndx < n_rec_UpperLimit && rIndx < witnessCount; rIndx++) {
-                if (witnessArray[rIndx].sRequester != NULL && servRequester->feedbacks[witnessArray[rIndx].sRequester->id].trustScore >= H_Thres) {
-                    projWaitTimeByWitnesses += (servRequester->feedbacks[witnessArray[rIndx].sRequester->id].trustScore / netCredibility) * witnessArray[rIndx].witnessWaitTime;
-                }
-            }
-        }
-        /*
-        //3. Equation 9: Determine weight for witness projected wait time (this is normalized)
-            if(servRequester != NULL){
-                rho += (servRequester->credibility / netCredibility) * servRequester->honesty;
-            }
-        if (netCredibility > 0.0) {
-            for (int rIndx = 0; rIndx < n_rec_UpperLimit && rIndx < witnessCount; rIndx++) {
-                if (witnessArray[rIndx].sRequester != NULL) {
-                    rho += (witnessArray[rIndx].sRequester->credibility / netCredibility) *
-                           witnessArray[rIndx].sRequester->honesty;
-                }
-            }
-        }
-
-        //Rho can be as high as 0.5 so multiply it by 0.5
-        rho = 0.5 * rho;*/
-    }
-
-    /*real spCalcTrustScore = SP->trustScore;
-    if(servRequester != NULL){
-        spCalcTrustScore = calculateSPTrustScoreBySR(SP, servRequester, witnessArray, witnessCount);
-    }
-
-    //4. Calculate Equation 8 to determine the projected wait time based on witnesses and advertised wait time
-    projectedWaitTime = (((1 - rho) * (advertisedWaitTime/spCalcTrustScore)) + (rho * projWaitTimeByWitnesses));
-    */
-    if(projWaitTimeByWitnesses > -1.0){
-        projectedWaitTime = projWaitTimeByWitnesses;
-    }
-    else{
-        projectedWaitTime = advertisedWaitTime;
-    }
-    /*else {
-        if(servRequester == NULL) {
-            projectedWaitTime = (advertisedWaitTime / SP->trustScore);
-        }
-        else{
-            projectedWaitTime = (advertisedWaitTime / SP->feedbacks[servRequester->id].trustScore);
-        }
-    }*/
-    return projectedWaitTime;
-}
-
-struct ServiceProvider* getLeastBusySP(struct ServiceRequester* servRequester, real currentTime)
-{
-    //define an array to store one or more SP with least projected wait time
-    int leastBusySPs [N_SP];
-    for(int x = 0; x < N_SP; x++)
-    {
-        leastBusySPs[x] = -1;
-    }
-    int s, leastBusySPCount;
-    real currentSPAdvertisedWaitTime;
-    leastBusySPCount = 1;
-    //struct ServiceProvider* selectedSP = &providerArray[0];
-    currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(&providerArray[0], currentTime);
-    real leastProjectedWaitTime = getProjectedWaitTime(&providerArray[0], servRequester, currentSPAdvertisedWaitTime);
-    leastBusySPs[0] = 0;
-    for(s = 1; s < N_SP; s++)
-    {
-        currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(&providerArray[s], currentTime);
-        real currentSPLeastProjectedWaitTime = getProjectedWaitTime(&providerArray[s], servRequester, currentSPAdvertisedWaitTime);
-
-        if(currentSPLeastProjectedWaitTime < leastProjectedWaitTime)
-        {
-            //selectedSP = &providerArray[s];
-            leastProjectedWaitTime = currentSPLeastProjectedWaitTime;
-            //reset the leastBusySPCount array
-            for(int x = 0; x < N_SP; x++) {
-                leastBusySPs[x] = -1;
-            }
-            //add the new SP with least wait time to the array
-            leastBusySPs[0] = s;
-            leastBusySPCount = 1;
-        }
-        else if(currentSPLeastProjectedWaitTime == leastProjectedWaitTime){
-            //then add the new SP in the leastBusySPs array
-            for(int x = 0; x < N_SP; x++){
-                if(leastBusySPs[x] == -1){
-                    leastBusySPs[x] = s;
-                    leastBusySPCount++;
-                    break;
-                }
-            }
-        }
-    }
-    if(leastBusySPCount == 1)
-    {
-        return &providerArray[leastBusySPs[0]];
-    }
-    else{
-        int spIndxArray[leastBusySPCount];
-        for(int y = 0; y < leastBusySPCount; y++){
-            spIndxArray[y] =  leastBusySPs[y];
-        }
-        int randomIndx = rand();
-        return &providerArray[spIndxArray[randomIndx % ARR_SIZE(spIndxArray)]];
-    }
-}
-
-struct ServiceProvider *getMostTrustworthySP(struct ServiceRequester *servRequester)
-{
-    //define an array to store one or more SP with best trust score
-    int bestTrustScoreSPs [N_SP];
-    for(int x = 0; x < N_SP; x++)
-    {
-        bestTrustScoreSPs[x] = -1;
-    }
-    int s, bestTrustScoreSPCount, wtCount;
-    real bestSPTrustScore, currentSPTrustScore;
-    bestTrustScoreSPCount = 1;
-
-    struct Witness witnessArray[N_SR];
-    for(int i = 0; i < N_SR; i++){
-        witnessArray[i].sRequester = NULL;
-    }
-    getrecommendersForSR(servRequester, &providerArray[0], witnessArray, &wtCount);
-
-    bestSPTrustScore = providerArray[0].trustScore;
-    bestTrustScoreSPs[0] = 0;
-    for(s = 1; s < N_SP; s++)
-    {
-        for(int i = 0; i < N_SR; i++){
-            witnessArray[i].sRequester = NULL;
-        }
-        getrecommendersForSR(servRequester, &providerArray[s], witnessArray, &wtCount);
-        currentSPTrustScore = providerArray[s].trustScore;
-
-        if(currentSPTrustScore > bestSPTrustScore)
-        {
-            bestSPTrustScore = currentSPTrustScore;
-            //reset the leastBusySPCount array
-            for(int x = 0; x < N_SP; x++) {
-                bestTrustScoreSPs[x] = -1;
-            }
-            //add the new SP with least wait time to the array
-            bestTrustScoreSPs[0] = s;
-            bestTrustScoreSPCount = 1;
-        }
-        else if(currentSPTrustScore == bestSPTrustScore){
-            //then add the new SP in the bestTrustScoreSPs array
-            for(int x = 0; x < N_SP; x++){
-                if(bestTrustScoreSPs[x] == -1){
-                    bestTrustScoreSPs[x] = s;
-                    bestTrustScoreSPCount++;
-                    break;
-                }
-            }
-        }
-    }
-    if(bestTrustScoreSPCount == 1)
-    {
-        return &providerArray[bestTrustScoreSPs[0]];
-    }
-    else{
-        int spIndxArray[bestTrustScoreSPCount];
-        for(int y = 0; y < bestTrustScoreSPCount; y++){
-            spIndxArray[y] =  bestTrustScoreSPs[y];
-        }
-        int randomIndx = rand();
-        return &providerArray[spIndxArray[randomIndx % ARR_SIZE(spIndxArray)]];
-    }
-}
-
 struct ServiceProvider *getLeastBusySPAmongMostTrustworthySP(struct ServiceRequester *servRequester, real currentTime)
 {
     //define an array to store one or more SP with best trust score
@@ -534,25 +349,18 @@ struct ServiceProvider *getLeastBusySPAmongMostTrustworthySP(struct ServiceReque
         bestTrustScoreSPs[x] = -1;
         bestTrustScores[x] = 0.0;
     }
-    int s, bestTrustScoreSPCount, wtCount;
+    int s;
     real bestSPTrustScore, currentSPTrustScore;
 
-    struct Witness witnessArray[N_SR];
-    for(int i = 0; i < N_SR; i++){
-        witnessArray[i].sRequester = NULL;
-    }
-    getrecommendersForSR(servRequester, &providerArray[0], witnessArray, &wtCount);
-
-    bestSPTrustScore = providerArray[0].trustScore;
+    bestSPTrustScore = providerArray[0].feedbacks[servRequester->id].trustScore;
     bestTrustScoreSPs[0] = 0;
     bestTrustScores[0] = bestSPTrustScore;
     for(s = 1; s < N_SP; s++)
     {
-        for(int i = 0; i < N_SR; i++){
+        /*for(int i = 0; i < N_SR; i++){
             witnessArray[i].sRequester = NULL;
-        }
-        getrecommendersForSR(servRequester, &providerArray[s], witnessArray, &wtCount);
-        currentSPTrustScore = providerArray[s].trustScore;
+        }*/
+        currentSPTrustScore = providerArray[s].feedbacks[servRequester->id].trustScore;
         bestTrustScores[s] = currentSPTrustScore;
         //Now store the index of the current SP in bestTrustScoreSPs array sorted in descending order
         int currentSPIndx = s;
@@ -661,17 +469,6 @@ struct ServiceProvider *getLeastBusySPAmongMostTrustworthySP(struct ServiceReque
         }
     }
 
-    /*
-    if(servRequester->id == 726)
-    {
-        printf("\n******************* Customer 726 *****************\n");
-        for(int w = 0; w < N_Rec; w++)
-        {
-            printf("Selected SP%d: %d\n",w, selectedSPs[w]);
-        }
-        printf("\n**************************************************\n");
-    }
-    */
     //Now select an SPs with least wait time
     int leastWaitTimeSPs[N_Rec]; // there may be up to N_Rec SPs with least wait time
     for(int x = 0; x < N_Rec; x++)
@@ -680,20 +477,17 @@ struct ServiceProvider *getLeastBusySPAmongMostTrustworthySP(struct ServiceReque
     }
 
     int leastBusySPCount;
-    real currentSPAdvertisedWaitTime;
     leastBusySPCount = 1;
 
-    currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(&providerArray[selectedSPs[0]], currentTime);
-    real leastProjectedWaitTime = getProjectedWaitTime(&providerArray[selectedSPs[0]], servRequester, currentSPAdvertisedWaitTime);
+    real leastAdvertisedWaitTime = getSPAdvertisedWaitTime(&providerArray[selectedSPs[0]], currentTime);
     leastWaitTimeSPs[0] = selectedSPs[0];
     for(s = 1; s < N_Rec; s++)
     {
-        currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(&providerArray[selectedSPs[s]], currentTime);
-        real currentSPLeastProjectedWaitTime = getProjectedWaitTime(&providerArray[selectedSPs[s]], servRequester, currentSPAdvertisedWaitTime);
+        real currentSPAdvertisedWaitTime = getSPAdvertisedWaitTime(&providerArray[selectedSPs[s]], currentTime);
 
-        if(currentSPLeastProjectedWaitTime < leastProjectedWaitTime)
+        if(currentSPAdvertisedWaitTime < leastAdvertisedWaitTime)
         {
-            leastProjectedWaitTime = currentSPLeastProjectedWaitTime;
+            leastAdvertisedWaitTime = currentSPAdvertisedWaitTime;
             //reset the leastBusySPCount array
             for(int x = 0; x < N_Rec; x++) {
                 leastWaitTimeSPs[x] = -1;
@@ -702,7 +496,7 @@ struct ServiceProvider *getLeastBusySPAmongMostTrustworthySP(struct ServiceReque
             leastWaitTimeSPs[0] = selectedSPs[s];
             leastBusySPCount = 1;
         }
-        else if(currentSPLeastProjectedWaitTime == leastProjectedWaitTime){
+        else if(currentSPAdvertisedWaitTime == leastAdvertisedWaitTime){
             //then add the new SP in the leastBusySPs array
             for(int x = 0; x < N_SP; x++){
                 if(leastWaitTimeSPs[x] == -1){
@@ -727,55 +521,6 @@ struct ServiceProvider *getLeastBusySPAmongMostTrustworthySP(struct ServiceReque
     }
 }
 
-/*void getAllWitnessOrderedByCredibility(struct ServiceProvider* servProvider, struct Witness* witnessArray, int *witnessCount)
-{
-    *witnessCount = 0;
-
-    //set the array to null first
-    for(int wIndx = 0; wIndx < N_SR; wIndx++)
-    {
-        witnessArray[wIndx].sRequester = NULL;
-    }
-
-    //iterate through each service requester and find out all the ones
-    //that have prior experience with the SP
-    for(int wIndx = 0; wIndx < N_SR; wIndx++)
-    {
-        //iterate the service experience of each SR to check if it has prior experience
-        for(int sIndx = 0; sIndx < N_SP; sIndx++)
-        {
-            if(customerArray[wIndx].serviceExperiences[sIndx].sProvider->id == servProvider->id)
-            {
-                struct ServiceRequester* currentSR = &customerArray[wIndx];
-                if(currentSR->serviceExperiences[sIndx].lastServiceRating > -1.0)
-                {
-                    //if the customer has experience with the SP then increment the counter
-                    *witnessCount++;
-                    for(int w = 0; w < N_SR; w++)
-                    {
-                        if(witnessArray[w].sRequester == NULL)
-                        {
-                            witnessArray[w].sRequester = currentSR;
-                            witnessArray[w].waitTimeRating = currentSR->serviceExperiences[sIndx].lastServiceRating;
-                            witnessArray[w].witnessWaitTime = currentSR->serviceExperiences[sIndx].lastServiceAdvertisedWaitTime;
-                            break;
-                        }
-                        else if(witnessArray[w].sRequester->credibility < currentSR->credibility)
-                        {
-                            struct ServiceRequester* tempSR = witnessArray[w].sRequester;
-                            witnessArray[w].sRequester = currentSR;
-                            witnessArray[w].waitTimeRating = currentSR->serviceExperiences[sIndx].lastServiceRating;
-                            witnessArray[w].witnessWaitTime = currentSR->serviceExperiences[sIndx].lastServiceAdvertisedWaitTime;
-                            currentSR = tempSR;
-                        }
-                    }
-                }
-                break;
-            }
-        }
-    }
-}
-*/
 void getrecommendersForSR(struct ServiceRequester *servRequester, struct ServiceProvider *servProvider, struct Witness *witnessArray, int *witnessCount)
 {
     //set the array to null first
@@ -804,37 +549,11 @@ void getrecommendersForSR(struct ServiceRequester *servRequester, struct Service
         }
         if(customerArray[wIndx].serviceExperiences[spIndx].lastServiceRating > -1.0)
         {
-            //if(customerArray[wIndx].feedbacks[servRequester->id].trustScore > H_Thres)
-            //{
-                *witnessCount = *witnessCount + 1;
-                if(*witnessCount > N_SR){
-                    printf("************ERROR************\nWitness count greater than N_SR\n");
-                }
-                struct ServiceRequester* currentSR = &customerArray[wIndx];
-                for(int w = 0; w < N_SR; w++)
-                {
-                    if (witnessArray[w].sRequester == NULL) {
-                        witnessArray[w].sRequester = currentSR;
-                        witnessArray[w].waitTimeRating = currentSR->serviceExperiences[spIndx].lastServiceRating;
-                        witnessArray[w].witnessWaitTime = currentSR->serviceExperiences[spIndx].lastServiceAdvertisedWaitTime;
-                        break;
-                    } else if (servRequester->feedbacks[currentSR->id].trustScore > servRequester->feedbacks[witnessArray[w].sRequester->id].trustScore) {
-                        struct ServiceRequester *tempSR = witnessArray[w].sRequester;
-                        witnessArray[w].sRequester = currentSR;
-                        witnessArray[w].waitTimeRating = currentSR->serviceExperiences[spIndx].lastServiceRating;
-                        witnessArray[w].witnessWaitTime = currentSR->serviceExperiences[spIndx].lastServiceAdvertisedWaitTime;
-                        currentSR = tempSR;
-                    }
-                    /*else if (servRequester->feedbacks[currentSR->id].trustScore == servRequester->feedbacks[witnessArray[w].sRequester->id].trustScore
-                            && customerArray[currentSR->id].serviceExperiences[spIndx].lastServiceStartTime > customerArray[witnessArray[w].sRequester->id].serviceExperiences[spIndx].lastServiceStartTime) {
-                        struct ServiceRequester *tempSR = witnessArray[w].sRequester;
-                        witnessArray[w].sRequester = currentSR;
-                        witnessArray[w].waitTimeRating = currentSR->serviceExperiences[spIndx].lastServiceRating;
-                        witnessArray[w].witnessWaitTime = currentSR->serviceExperiences[spIndx].lastServiceAdvertisedWaitTime;
-                        currentSR = tempSR;
-                    }*/
-                }
-            //}
+            //Return all witness as long as they have prior experience
+            witnessArray[*witnessCount].sRequester = &customerArray[wIndx];
+            witnessArray[*witnessCount].waitTimeRating = customerArray[wIndx].serviceExperiences[spIndx].lastServiceRating;
+            witnessArray[*witnessCount].witnessWaitTime = customerArray[wIndx].serviceExperiences[spIndx].lastServiceAdvertisedWaitTime;
+            *witnessCount = *witnessCount + 1;
         }
     }
 }
@@ -898,12 +617,13 @@ void updateServiceExperience(struct ServiceRequester* servRequeter)
     //find the service experience to update;
     struct ServiceExperience *svcExp = NULL;
     struct ServiceExperienceHistory *servExpHistory = NULL;
-    for(int svcIndx = 0; svcIndx < N_SP; svcIndx++)
+    int currentSPIndx = -1;
+    for(currentSPIndx = 0; currentSPIndx < N_SP; currentSPIndx++)
     {
-        if(servRequeter->serviceExperiences[svcIndx].sProvider->id == SP->id)
+        if(servRequeter->serviceExperiences[currentSPIndx].sProvider->id == SP->id)
         {
-            svcExp = &servRequeter->serviceExperiences[svcIndx];
-            servExpHistory = &servRequeter->experienceHistory[svcIndx];
+            svcExp = &servRequeter->serviceExperiences[currentSPIndx];
+            servExpHistory = &servRequeter->experienceHistory[currentSPIndx];
             break;
         }
     }
@@ -1020,141 +740,17 @@ void updateServiceExperience(struct ServiceRequester* servRequeter)
     //calculate the trust score towards the SP from this SR
     SP->feedbacks[servRequeter->id].trustScore = SP->feedbacks[servRequeter->id].positiveFeedback / (SP->feedbacks[servRequeter->id].positiveFeedback + SP->feedbacks[servRequeter->id].negativeFeedback);
 
-    //for Josang's Beta Reputation, if last service rating is equal to or less than 60% then make it a negative experience
-    if(svcExp->lastServiceRating > 0.6){
-        SP->totalPositiveFeedbacks++;
-    }
-    else{
-        SP->totalNegativeFeedbacks++;
-    }
-
-    SP->trustScore = ((real)(SP->totalPositiveFeedbacks)/(real)(SP->totalPositiveFeedbacks + SP->totalNegativeFeedbacks));
-
-    //now provide feedback for each witness. Witness is an SR that had service experience from the SP in past
+    //now update feedback for all other SRs (witnesses) that had service experience from the SP in past
     for(int fdIndx = 0; fdIndx < N_SR; fdIndx++)
     {
-        /*if(servRequeter->witnesses[fdIndx].sRequester == NULL){
-            break;
-        }*/
         //do NOT give feedback to ownself
-        if(servRequeter->witnesses[fdIndx].sRequester != NULL && servRequeter->witnesses[fdIndx].sRequester->id != servRequeter->id)
+        if(customerArray[fdIndx].serviceExperiences[currentSPIndx].lastServiceRating != -1 && fdIndx != servRequeter->id)
         {
-            real witnessRatingNew;
-            real normRating;
-
-            if(servRequeter->isMalicious == 1)
-            {
-                if(servRequeter->witnesses[fdIndx].sRequester->isMalicious == 1)
-                {
-                    witnessRatingNew = 5.0;
-                }
-                else
-                {
-                    witnessRatingNew = 1.0;
-                }
-            }
-            else
-            {
-                //determine the difference between the wait time rating experienced by current SR and the witness
-                real waitTimeRatingDiffWithWitness = fabs(svcExp->lastServiceRating - servRequeter->witnesses[fdIndx].waitTimeRating);
-
-                //determine the new rating for the witness
-                witnessRatingNew = 5.0 - waitTimeRatingDiffWithWitness;
-            }
-
-            normRating = (witnessRatingNew / 5.0);
-
-            servRequeter->witnesses[fdIndx].sRequester->feedbacks[servRequeter->id].positiveFeedback += normRating;
-            servRequeter->witnesses[fdIndx].sRequester->feedbacks[servRequeter->id].negativeFeedback += (1 - normRating);
-            servRequeter->witnesses[fdIndx].sRequester->feedbacks[servRequeter->id].totalFeedback++;
-            //calculate the honesty based on servRequester for the witness
-            servRequeter->witnesses[fdIndx].sRequester->feedbacks[servRequeter->id].trustScore = servRequeter->witnesses[fdIndx].sRequester->feedbacks[servRequeter->id].positiveFeedback / (servRequeter->witnesses[fdIndx].sRequester->feedbacks[servRequeter->id].positiveFeedback + servRequeter->witnesses[fdIndx].sRequester->feedbacks[servRequeter->id].negativeFeedback);
-
-            servRequeter->witnesses[fdIndx].sRequester->totalReviews++;
-            /*
-            if(*highestCentrality == 0.00 || (*highestCentrality < servRequeter->witnesses[fdIndx].sRequester->totalReviews))
-            {
-                *highestCentrality = servRequeter->witnesses[fdIndx].sRequester->totalReviews;
-            }
-             */
-            //now calculate the overall honesty of the SR
-            real positiveFB, negativeFB;
-            positiveFB = 0;
-            negativeFB = 0;
-            for(int x = 0; x < N_SR; x++){
-                if(servRequeter->witnesses[fdIndx].sRequester->id != x){//don't use ownself to calculate honesty
-                    if(servRequeter->witnesses[fdIndx].sRequester->feedbacks[x].totalFeedback > 0){
-                        positiveFB += servRequeter->witnesses[fdIndx].sRequester->feedbacks[x].positiveFeedback;
-                        negativeFB += servRequeter->witnesses[fdIndx].sRequester->feedbacks[x].negativeFeedback;
-                    }
-                }
-            }
-            servRequeter->witnesses[fdIndx].sRequester->honesty = positiveFB / (positiveFB + negativeFB);
-            //servRequeter->witnesses[fdIndx].sRequester->credibility = servRequeter->witnesses[fdIndx].sRequester->honesty * (servRequeter->witnesses[fdIndx].sRequester->totalReviews / *highestCentrality);
+            SP->feedbacks[fdIndx].positiveFeedback = SP->feedbacks[fdIndx].positiveFeedback + f;
+            SP->feedbacks[fdIndx].negativeFeedback = SP->feedbacks[fdIndx].negativeFeedback + 1.0 - f;
+            SP->feedbacks[fdIndx].totalFeedback++;
         }
     }
-
-    /*
-    //Update the trust score of the SP
-    //determine top N_Rec SR to calculate the trust score of SP
-    struct SRFeedback *highestRecommenders[N_Rec];
-    int rIndx, srIndx;
-    for(rIndx = 0; rIndx < N_Rec; rIndx++)
-    {
-        highestRecommenders[rIndx] = NULL;
-    }
-
-    for(srIndx = 0; srIndx < N_SR; srIndx++)
-    {
-        if(SP->feedbacks[srIndx].trustScore > 0.0)
-        {
-            struct SRFeedback *currentRec = &SP->feedbacks[srIndx];
-            for(rIndx = 0; rIndx < N_Rec; rIndx++)
-            {
-                if(highestRecommenders[rIndx] == NULL)
-                {
-                    highestRecommenders[rIndx] = currentRec;
-                    break;
-                }
-                else
-                {
-                    if(highestRecommenders[rIndx]->sRequester->credibility < currentRec->sRequester->credibility)
-                    {
-                        struct SRFeedback *tempSRF = highestRecommenders[rIndx];
-                        highestRecommenders[rIndx] = currentRec;
-                        currentRec = tempSRF;
-                    }
-                }
-            }
-
-        }
-    }
-
-    //update the trust score of the SP based on the new trust score from the SR
-    //int srIndx;
-    real newTrustScore, netSRCredibility;
-    netSRCredibility = 0.0;
-    newTrustScore = 0.0; //the new trust score of the SP calculated based on the latest updates
-
-    //determine the total credibility of of N_Rec
-    for(rIndx = 0; rIndx < N_Rec; rIndx++)
-    {
-        if(highestRecommenders[rIndx] != NULL)
-        {
-            netSRCredibility += highestRecommenders[rIndx]->sRequester->credibility;
-        }
-    }
-    for(rIndx = 0; rIndx < N_Rec; rIndx++)
-    {
-        if(highestRecommenders[rIndx] != NULL)
-        {
-            newTrustScore = newTrustScore + ((highestRecommenders[rIndx]->sRequester->credibility / netSRCredibility) * highestRecommenders[rIndx]->trustScore);
-        }
-    }
-
-    if(newTrustScore > 0.00)
-        SP->trustScore = newTrustScore;
-    */
 }
 
 void cleanupServiceRequesterBeforeLeaving(struct ServiceRequester* servRequester)
@@ -1174,43 +770,14 @@ void cleanupServiceRequesterBeforeLeaving(struct ServiceRequester* servRequester
 
 void printBasicFacilityInfo()
 {
-    printf("#  \t F_ID \t Visitors\t Mal\t In Service\t Avg Queue\t InQ\t Busy Period\t Next Avail Slot\tTrust Score\tAdv Wait Time\tActual Wait Time\tProjected Wait Time\n");
+    printf("#\tF_ID\tVisitors\tMal\tIn Service\tAvg Queue\tInQ\tBusy Period\n");
     real ct = time();
     for(int i = 0; i < N_SP; i++)
     {
         int fbIndx, fbSRCount;
         real posFB, negFB, trustScore, advertisedWT, actualWT, projectedWaitTime;
-        advertisedWT = getSPAdvertisedWaitTime(&providerArray[i], ct);
-        projectedWaitTime = getProjectedWaitTime(&providerArray[i], NULL, advertisedWT);
-        actualWT = providerArray[i].nextAvailTime - ct;
-        if(actualWT < 0.016700)
-        {
-            actualWT = 0.016700;
-        }
-        posFB = 0.0;
-        negFB = 0.0;
-        trustScore = 0.0;
-        fbSRCount = 0;
-        for(fbIndx = 0; fbIndx < N_SR; fbIndx++)
-        {
-            posFB = posFB + providerArray[i].feedbacks[fbIndx].positiveFeedback;
-            negFB = negFB + providerArray[i].feedbacks[fbIndx].negativeFeedback;
 
-            if(providerArray[i].feedbacks[fbIndx].trustScore > 0.0)
-            {
-                fbSRCount++;
-                trustScore = trustScore + providerArray[i].feedbacks[fbIndx].trustScore;
-            }
-        }
-        if(fbSRCount > 0)
-        {
-            trustScore = trustScore / fbSRCount;
-        }
-        printf("SP%d \t %d\t%d\t\t %d \t %.2f \t %.2f \t %d \t %.2f \t %.2f \t\t %.2f\t %.2f\t %.2f\t%.2f\n", i, providerArray[i].id, providerArray[i].totalVisitorCount, providerArray[i].isMalicious, U(providerArray[i].id), Lq(providerArray[i].id), inq(providerArray[i].id), B(providerArray[i].id), providerArray[i].nextAvailTime, providerArray[i].trustScore, advertisedWT, actualWT, projectedWaitTime);
-        /*for(int as = 0; as < M_SP; as++)
-        {
-        	printf("\t\tAvail Slot: %d, Value: %.2f\n", as, providerArray[i].availabilitySlotList[as]);
-        }*/
+        printf("SP%d\t%d\t%d\t%d\t%.2f\t%.2f\t%d\t%.2f\n", i, providerArray[i].id, providerArray[i].totalVisitorCount, providerArray[i].isMalicious, U(providerArray[i].id), Lq(providerArray[i].id), inq(providerArray[i].id), B(providerArray[i].id));
     }
 }
 
@@ -1260,67 +827,65 @@ void printBasicCustomerInfo()
     printf("Average Malicious SR Credibility: %.2f\nAverage Non-Malicious SR Credibility: %.2f\n", (totalMaliciousCredibility/malSRCount), (totalNonMaliciousCredibility/nonMalSRCount));
 }
 
-void printRecommenders(int customerId){
-    printf("Current Time: %f\n", time());
-    for(int spIndx = 0; spIndx < N_SP; spIndx++){
-        printf("SPID: %d\tIsMalicious: %d\n", spIndx, providerArray[spIndx].isMalicious);
-        int witnessCount = 0;
-        struct Witness witnessArray[N_SR];
-        getrecommendersForSR(&customerArray[customerId], &providerArray[spIndx], witnessArray, &witnessCount);
-        if(witnessCount > 0){
-            printf("\tWitness Count: %d\n", witnessCount);
-            for(int wtIndx = 0; wtIndx < N_SR; wtIndx++) {
-                if(witnessArray[wtIndx].sRequester == NULL){
-                    break;
-                }
-                //Service experience history
-                char serviceExp[150];
-                strcpy(serviceExp,"");
-                for(int seIndx = 0; seIndx <  customerArray[witnessArray[wtIndx].sRequester->id].experienceHistory[spIndx].historyCount; seIndx++){
-                    char str[19];
-                    sprintf(str,"%.1f|%.3f|%.3f || ", customerArray[witnessArray[wtIndx].sRequester->id].experienceHistory[spIndx].servExp[seIndx].lastServiceRating, customerArray[witnessArray[wtIndx].sRequester->id].experienceHistory[spIndx].servExp[seIndx].lastServiceActualWaitTime, customerArray[witnessArray[wtIndx].sRequester->id].experienceHistory[spIndx].servExp[seIndx].lastServiceAdvertisedWaitTime);
-                    strcat(serviceExp, str);
-                }
-                printf("\tWitness Id: %d, Is Malicious: %d, Honesty: %f, Experience History: %s\n",
-                       witnessArray[wtIndx].sRequester->id, witnessArray[wtIndx].sRequester->isMalicious,
-                       witnessArray[wtIndx].sRequester->feedbacks[1].trustScore,
-                       serviceExp);
-            }
-        }
-        else
+void myReport(int isFinalReport)
+{
+    printf("\n\n\nFinal Simulation Report\n\n\n");
+    printBasicFacilityInfo();
+    printBasicCustomerInfo();
+}
+
+void figure7Report(real *report1LastPrinted, real currentTime)
+{
+    if((*report1LastPrinted <= (currentTime + 5.0))) {
+        *report1LastPrinted += 5;
+
+        //iterate through each SR and find total SP visits and update totalSPVisitsByGoodSRs and totalMaliciousSPVisitsByGoodSRs
+        int latestTotalSPVisits = 0, latestTotalMaliciousSPVisits = 0;
+
+        for(int sr = 0; sr <N_SR; sr++)
         {
-            int totalSRwithExp = 0;
-            for(int srIndx = 0; srIndx < N_SR; srIndx++){
-                if(customerArray[srIndx].serviceExperiences[spIndx].lastServiceRating > -1.0){
-                    totalSRwithExp++;
+            if(customerArray[sr].isMalicious == 1)
+            {
+                continue;
+            }
+            for(int sp = 0; sp < N_SP; sp++)
+            {
+                if(customerArray[sr].serviceExperiences[sp].totalVisits > 0)
+                {
+                    latestTotalSPVisits += customerArray[sr].serviceExperiences[sp].totalVisits;
+                    if(customerArray[sr].serviceExperiences[sp].sProvider->isMalicious == 1)
+                    {
+                        latestTotalMaliciousSPVisits += customerArray[sr].serviceExperiences[sp].totalVisits;
+                    }
                 }
             }
-            printf("\tTotal SRs with experience: %d\n", totalSRwithExp);
         }
+
+        int totalSPVisitsSinceLastCount = latestTotalSPVisits - totalSPVisitsByGoodSRs;
+        int totalMaliciousSPVisitsSinceLastCount = latestTotalMaliciousSPVisits - totalMaliciousSPVisitsByGoodSRs;
+
+        real maliciouSPVisitPercentage = 0.0;
+        if(totalMaliciousSPVisitsSinceLastCount > 0) {
+            maliciouSPVisitPercentage =  (totalMaliciousSPVisitsSinceLastCount * 100.0 / (real) totalSPVisitsSinceLastCount);
+        }
+
+        totalSPVisitsByGoodSRs = latestTotalSPVisits;
+        totalMaliciousSPVisitsByGoodSRs = latestTotalMaliciousSPVisits;
+
+        printf("%.2f\t%d\t%d\t%.2f\t%d\t%d\n",
+               currentTime, totalSPVisitsSinceLastCount, totalMaliciousSPVisitsSinceLastCount,
+               maliciouSPVisitPercentage, totalSPVisitsByGoodSRs, totalMaliciousSPVisitsByGoodSRs);
     }
 }
 
-void testReport(real *report1LastPrinted, real currentTime)
+void figure8Report(real *report1LastPrinted, real currentTime)
 {
-    //int testCustomerId = 1;
-
-    //if(customer != testCustomerId){ return;}
-    if(event != 3){
-        return;
-    }
-    //if((customer == testCustomerId) || (*report1LastPrinted <= (currentTime + 5.0))) {
-    if((*report1LastPrinted <= (currentTime + 5.0))) {
+    //Display figure 4 report
+    if((*report1LastPrinted <= (currentTime + 5.0)))
+    {
         *report1LastPrinted += 5;
-        /*printRecommenders(testCustomerId);
-        return;*/
-        /*printf("Current Event: %d", event);
-        if(event == 2 && customerArray[testCustomerId].currentSP != NULL){
-            printf("\tCurrent SP: %d\n", customerArray[testCustomerId].currentSP->id);
-        }
-        else{
-            printf("\n");
-        }*/
-        printf("SRId\tSPId\tFId\tVstrs\tMal\tInQ\tBusy\tNxtAvl\tTrst\tAdvr\tActl\tPrjctd\tT Vsts\tCurrT\tTstSRVsts\tLstRtng|ActWT|AdvWT\tWtnsCount\n");
+
+        printf("SRId\tSPId\tFId\tVstrs\tMal\tInQ\tBusy\tNxtAvl\tTrst\tAdvr\tActl\tT Vsts\tCurrT\tTstSRVsts\tLast Visited SR\tLstRtng|ActWT|AdvWT\tWtnsCount\n");
 
         int totalVisitors, witnessCount;
         char serviceExp[150];
@@ -1329,97 +894,49 @@ void testReport(real *report1LastPrinted, real currentTime)
         {
             totalVisitors += providerArray[i].totalVisitorCount;
         }
-        for(int testCustomerId = 0; testCustomerId < N_SR; testCustomerId++) {
-            if(testCustomerId < 725 || testCustomerId > 727){
-                continue;
+        //for(int x = 0; x < 3; x++) {
+        int testCustomerId = customer;
+        for (int i = 0; i < N_SP; i++) {
+            //Service experience history will be displayed under last service rating
+            strcpy(serviceExp, "");
+            for (int seIndx = 0;
+                 seIndx < customerArray[testCustomerId].experienceHistory[i].historyCount; seIndx++) {
+                char str[19];
+                sprintf(str, "%.1f|%.3f|%.3f || ",
+                        customerArray[testCustomerId].experienceHistory[i].servExp[seIndx].lastServiceRating,
+                        customerArray[testCustomerId].experienceHistory[i].servExp[seIndx].lastServiceActualWaitTime,
+                        customerArray[testCustomerId].experienceHistory[i].servExp[seIndx].lastServiceAdvertisedWaitTime);
+                strcat(serviceExp, str);
             }
-            for (int i = 0; i < N_SP; i++) {
-                //Service experience history will be displayed under last service rating
-                strcpy(serviceExp, "");
-                for (int seIndx = 0;
-                     seIndx < customerArray[testCustomerId].experienceHistory[i].historyCount; seIndx++) {
-                    char str[19];
-                    sprintf(str, "%.1f|%.3f|%.3f || ",
-                            customerArray[testCustomerId].experienceHistory[i].servExp[seIndx].lastServiceRating,
-                            customerArray[testCustomerId].experienceHistory[i].servExp[seIndx].lastServiceActualWaitTime,
-                            customerArray[testCustomerId].experienceHistory[i].servExp[seIndx].lastServiceAdvertisedWaitTime);
-                    strcat(serviceExp, str);
-                }
-                int fbIndx, fbSRCount;
-                real trustScore, advertisedWT, actualWT, projectedWaitTime;
-                advertisedWT = getSPAdvertisedWaitTime(&providerArray[i], currentTime);
-                projectedWaitTime = getProjectedWaitTime(&providerArray[i], &customerArray[testCustomerId],
-                                                         advertisedWT);
-                actualWT = providerArray[i].nextAvailTime - currentTime;
-                if (actualWT < 0.016700) {
-                    actualWT = 0.016700;
-                }
-
-                witnessCount = 0;
-                struct Witness witnessArray[N_SR];
-                getrecommendersForSR(&customerArray[testCustomerId], &providerArray[i], witnessArray, &witnessCount);
-                trustScore = providerArray[i].trustScore;
-
-                printf("SR%d\tSP%d\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%.2f\t%d\t%s\t%d\n", testCustomerId,
-                       i, providerArray[i].id, providerArray[i].totalVisitorCount, providerArray[i].isMalicious,
-                       inq(providerArray[i].id), B(providerArray[i].id), providerArray[i].nextAvailTime, trustScore,
-                       advertisedWT, actualWT, projectedWaitTime, totalVisitors, currentTime,
-                       providerArray[i].feedbacks[testCustomerId].totalFeedback, serviceExp, witnessCount);
-                /*for(int as = 0; as < M_SP; as++)
-                {
-                    printf("\t\tAvail Slot: %d, Value: %.2f\n", as, providerArray[i].availabilitySlotList[as]);
-                }*/
-            }
-        }
-        printf("********************************************\n");
-    }
-}
-
-void figure1Report(real* lastReportedTime, real currentTime)
-{
-    //printf("I am in case 1\n");
-    //printf("last reported time: %.2f, currentTime: %.2f\n", *lastReportedTime, currentTime);
-    //int currentTimeInt = (int)currentTime;
-    if(*lastReportedTime <= (currentTime + 5.0))
-    {
-        int totalVisitors;
-        totalVisitors = 0;
-        *lastReportedTime += 5;
-        for(int i = 0; i < N_SP; i++)
-        {
-            totalVisitors += providerArray[i].totalVisitorCount;
-        }
-        for(int i = 0; i < N_SP; i++)
-        {
-            int wtCount;
-            wtCount = 0;
-            real trustScore, advertisedWT, actualWT, projectedWaitTime;
+            int fbIndx, fbSRCount;
+            real trustScore, advertisedWT, actualWT;
             advertisedWT = getSPAdvertisedWaitTime(&providerArray[i], currentTime);
-            projectedWaitTime = getProjectedWaitTime(&providerArray[i], &customerArray[reportingCustomer], advertisedWT);
             actualWT = providerArray[i].nextAvailTime - currentTime;
-            if(actualWT < 0.016700)
-            {
+            if (actualWT < 0.016700) {
                 actualWT = 0.016700;
             }
+
+            witnessCount = 0;
             struct Witness witnessArray[N_SR];
-            getrecommendersForSR(&customerArray[reportingCustomer], &providerArray[i], witnessArray, &wtCount);
-
-            trustScore = providerArray[i].trustScore;
-
-
-            printf("SP%d\t%d\t%d\t%d\t%.2f\t%.2f\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%.2f\n", i, providerArray[i].id, providerArray[i].totalVisitorCount, providerArray[i].isMalicious, U(providerArray[i].id), Lq(providerArray[i].id), inq(providerArray[i].id), B(providerArray[i].id), providerArray[i].nextAvailTime, providerArray[i].trustScore, advertisedWT, actualWT, projectedWaitTime, totalVisitors, currentTime);
+            getrecommendersForSR(&customerArray[testCustomerId], &providerArray[i], witnessArray, &witnessCount);
+            trustScore = providerArray[i].feedbacks[testCustomerId].trustScore;
+            int lastVisitedSP = -1;
+            if(customerArray[testCustomerId].currentSP != NULL)
+            {
+                lastVisitedSP = customerArray[testCustomerId].currentSP->id;
+            }
+            printf("SR%d\tSP%d\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%.2f\t%d\t%d\t%s\t%d\n", testCustomerId,
+                   i, providerArray[i].id, providerArray[i].totalVisitorCount, providerArray[i].isMalicious,
+                   inq(providerArray[i].id), B(providerArray[i].id), providerArray[i].nextAvailTime, trustScore,
+                   advertisedWT, actualWT, totalVisitors, currentTime,
+                   providerArray[i].feedbacks[testCustomerId].totalFeedback, lastVisitedSP, serviceExp,
+                   witnessCount);
             /*for(int as = 0; as < M_SP; as++)
             {
                 printf("\t\tAvail Slot: %d, Value: %.2f\n", as, providerArray[i].availabilitySlotList[as]);
             }*/
         }
+        //}
+        printf("********************************************\n");
     }
-}
-
-void myReport(int isFinalReport)
-{
-    printf("\nSimulation Report\n");
-    printBasicFacilityInfo();
-    printBasicCustomerInfo();
-    //testReport();
 }
