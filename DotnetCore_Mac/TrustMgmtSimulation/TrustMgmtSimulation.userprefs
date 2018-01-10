@@ -1,9 +1,8 @@
 ﻿<Properties StartupConfiguration="{ADC9186D-7D48-40F8-AD60-BFD19BDE2095}|Default">
   <MonoDevelop.Ide.ItemProperties.TrustMgmtSimulation PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="TrustMgmtSimulation/SMPLWrapper.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="TrustMgmtSimulation Status">
     <Files>
-      <File FileName="TrustMgmtSimulation/Program.cs" Line="12" Column="1" />
-      <File FileName="TrustMgmtSimulation/SMPLWrapper.cs" Line="42" Column="11" />
+      <File FileName="TrustMgmtSimulation Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />

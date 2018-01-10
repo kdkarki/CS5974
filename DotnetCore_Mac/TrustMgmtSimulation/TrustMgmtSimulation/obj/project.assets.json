@@ -2279,11 +2279,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/Snehi/Projects/TrustMgmtSimulation/TrustMgmtSimulation/TrustMgmtSimulation.csproj",
+      "projectUniqueName": "/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/TrustMgmtSimulation.csproj",
       "projectName": "TrustMgmtSimulation",
-      "projectPath": "/Users/Snehi/Projects/TrustMgmtSimulation/TrustMgmtSimulation/TrustMgmtSimulation.csproj",
+      "projectPath": "/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/TrustMgmtSimulation.csproj",
       "packagesPath": "/Users/Snehi/.nuget/packages/",
-      "outputPath": "/Users/Snehi/Projects/TrustMgmtSimulation/TrustMgmtSimulation/obj",
+      "outputPath": "/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
