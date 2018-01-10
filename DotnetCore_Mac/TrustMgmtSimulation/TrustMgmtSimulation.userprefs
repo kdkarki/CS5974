@@ -1,0 +1,15 @@
+﻿<Properties StartupConfiguration="{ADC9186D-7D48-40F8-AD60-BFD19BDE2095}|Default">
+  <MonoDevelop.Ide.ItemProperties.TrustMgmtSimulation PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="TrustMgmtSimulation/SMPLWrapper.cs">
+    <Files>
+      <File FileName="TrustMgmtSimulation/Program.cs" Line="12" Column="1" />
+      <File FileName="TrustMgmtSimulation/SMPLWrapper.cs" Line="42" Column="11" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>
