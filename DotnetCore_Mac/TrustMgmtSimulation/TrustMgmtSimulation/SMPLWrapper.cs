@@ -128,40 +128,139 @@ namespace TrustMgmtSimulation
         [DllImport("./libsmpl.dylib", EntryPoint = "civals")]
         public static extern void civals(ref double mean, ref double hw, ref int nb);
 
+        /* ------------------------------------------------------------------ */
+
         /*
-         [DllImport("./libsmpl.dylib", EntryPoint = "")]
-         public static extern 
+         * Function from smpl.c
          */
 
+
+        /*---------------  INITIALIZE SIMULATION SUBSYSTEM  ------------------*/
         [DllImport("./libsmpl.dylib", EntryPoint = "smpl")]
         public static extern void smpl(int id, string moduleName);
 
+        /*---------------------------  SAVE NAME  ----------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "reset")]
+        public static extern void reset();
+
+        /*---------------------------  SAVE NAME  ----------------------------*/
+        //TODO: This function is defined as static int save_name(char *s, int m)
+        //      So not sure if this is the right way to p/invoke this.
+        [DllImport("./libsmpl.dylib", EntryPoint = "save_name")]
+        public static extern int save_name(string s, int m);
+
+        /*-------------------------  GET MODEL NAME  -------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "mname")]
+        public static extern string mname();
+
+        /*------------------------  GET FACILITY NAME  -----------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "fname")]
+        public static extern string fname(int f);
+
+        //TODO: Following function not wrapped because they are defined static
+        //      get_blk : GET BlOCK
+        //      get_elm : GET ELEMENT
+        //      put_elm : RETURN ELEMENT
+
+        /*-------------------------  SCHEDULE EVENT  -------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "schedule")]
+        public static extern void schedule(int ev, double te, int tkn);
+
+        /*---------------------------  CAUSE EVENT  --------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "cause")]
+        public static extern void cause(ref int ev, ref int tkn);
+
+        /*--------------------------  RETURN TIME  ---------------------------*/
         [DllImport("./libsmpl.dylib", EntryPoint = "time")]
         public static extern double time();
 
-        /*
-         * Following function needs to be imported
-         * 
-            extern real Lq(), U(), B(), time();
-            extern char* fname(), *mname();
-            extern FILE* sendto();
+        /*--------------------------  CANCEL EVENT  --------------------------*/
+        /// <summary>
+        /// Cancel the specified event
+        /// </summary>
+        /// <returns>The id of the token (customer)</returns>
+        /// <param name="ev">Event id.</param>
+        [DllImport("./libsmpl.dylib", EntryPoint = "cancel")]
+        public static extern int cancel(int ev);
 
-            extern real uniform(), expntl(), erlang(), hyperx(), normal();
-            extern long seed();
+        /*-------------------------  SUSPEND EVENT  --------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "suspend")]
+        public static extern int suspend(int tkn);
 
-            void smpl(int, char*);
-            int facility(char*, int);
-            void schedule(int, real, int);
-            void cause(int*, int*);
-            int request(int, int, int);
-            void release(int, int);
-            void report();
-            void error(int, char*);
+        //TODO: static void enlist(int *head, int elm) not wrapped
 
-            void init_bm(int, int);
-            int obs(real);
-            void civals(real*, real*, int*);
-        *
-        */
+        /*-------------------------  DEFINE FACILITY  ------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "facility")]
+        public static extern int facility(string s, int n);
+
+        //TODO: static void resetf() not wrapped
+
+        /*------------------------  REQUEST FACILITY  ------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "request")]
+        public static extern int request(int f, int tkn, int pri);
+
+        //TODO: static void enque(int f, int j, int pri, int env, real te) nw/
+
+        /*------------------------  PREEMPT FACILITY  ------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "preempt")]
+        public static extern int preempt(int f, int tkn, int pri);
+
+        /*------------------------  RELEASE FACILITY  ------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "release")]
+        public static extern void release(int f, int tkn);
+
+        /*-----------------------  GET FACILITY STATUS  ----------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "status")]
+        public static extern int status(int f);
+
+        /*--------------------  GET CURRENT QUEUE LENGTH  --------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "inq")]
+        public static extern int inq(int f);
+
+        /*--------------------  GET FACILITY UTILIZATION  --------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "U")]
+        public static extern double U(int f);
+
+        /*----------------------  GET MEAN BUSY PERIOD  ----------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "B")]
+        public static extern double B(int f);
+
+        /*--------------------  GET AVERAGE QUEUE LENGTH  --------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "Lq")]
+        public static extern double Lq(int f);
+
+        /*-----------------------  TURN TRACE ON/OFF  ------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "trace")]
+        public static extern void trace(int n);
+
+        /*-----------------------------  PAUSE  ------------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "smpl_pause")]
+        public static extern void smpl_pause();
+
+        /*------------------  DISPLAY ERROR MESSAGE & EXIT  ------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "error")]
+        public static extern void error(int n, string s);
+
+        /*------------------------  GENERATE REPORT  -------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "report")]
+        public static extern void report();
+
+        /*--------------------  GENERATE FACILITY REPORT  --------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "reportf")]
+        public static extern void reportf();
+
+        /*---------------------------  COUNT LINES  --------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "lns")]
+        public static extern int lns(int i);
+
+        /*----------------------------  END PAGE  ----------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "endpage")]
+        public static extern void endpage();
+
+        /*----------------------------  NEW PAGE  ----------------------------*/
+        [DllImport("./libsmpl.dylib", EntryPoint = "newpage")]
+        public static extern void newpage();
+
+        //TODO: File *sendto(FILE *dest) -> need to be wrapped
     }
 }

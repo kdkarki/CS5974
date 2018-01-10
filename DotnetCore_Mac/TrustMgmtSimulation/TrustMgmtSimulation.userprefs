@@ -2,6 +2,8 @@
   <MonoDevelop.Ide.ItemProperties.TrustMgmtSimulation PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="TrustMgmtSimulation Status">
     <Files>
+      <File FileName="TrustMgmtSimulation/SMPLWrapper.cs" Line="264" Column="63" />
+      <File FileName="TrustMgmtSimulation/Program.cs" Line="10" Column="47" />
       <File FileName="TrustMgmtSimulation Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>

@@ -14,7 +14,6 @@
 /Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/TrustMgmtSimulation.runtimeconfig.dev.json
 /Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/TrustMgmtSimulation.dll
 /Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/TrustMgmtSimulation.pdb
-/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/TrustMgmtSimulation.csprojResolveAssemblyReference.cache
 /Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/TrustMgmtSimulation.csproj.CoreCompileInputs.cache
 /Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/TrustMgmtSimulation.AssemblyInfoInputs.cache
 /Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/TrustMgmtSimulation.AssemblyInfo.cs
