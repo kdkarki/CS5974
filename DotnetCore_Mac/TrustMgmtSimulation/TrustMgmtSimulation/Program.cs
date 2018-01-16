@@ -9,8 +9,8 @@ namespace TrustMgmtSimulation
 
         static void Main(string[] args)
         {
-            List<ISimulation> objSimulationArray = new List<ISimulation>(){new MMC1(), new MM1_Bmeans()};
-            objSimulationArray.ForEach(s => {s.Run();});
+            (new List<ISimulation>(){new MMC1(), new MM1_Bmeans()})
+            .ForEach(s => {s.Run(); SMPLWrapper.reset(); });
         }
     }
 }
