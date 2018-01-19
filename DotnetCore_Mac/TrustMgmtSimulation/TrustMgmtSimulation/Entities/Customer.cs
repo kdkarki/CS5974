@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace TrustMgmtSimulation.Entities
 {
@@ -9,56 +10,9 @@ namespace TrustMgmtSimulation.Entities
         /// <summary>
         /// This class represents visit by a Customer to a Service Provider
         /// </summary>
-        public class CustomerCurrentVisit
+        public class CurrentProviderVisit : Visit
         {
-            /// <summary>
-            /// The service provider selected in event 2
-            /// </summary>
-            /// <returns></returns>
-            public Provider SelectedProvider { get; set; }
-
-            /// <summary>
-            /// The wait time advertised by the service provider 
-            /// at the time of selection by the customer (event 2)
-            /// </summary>
-            /// <returns></returns>
-            public double AdvertisedWaitTime { get; set; }
-
-            /// <summary>
-            /// The projected wait time of the service provider 
-            /// at the time of selection by the customer (event 2)
-            /// </summary>
-            /// <returns></returns>
-            public double ProjectedWaitTime { get; set; }
-
-            /// <summary>
-            /// The actual wait time of the service provider
-            /// experienced by the customer when the customer
-            /// is able to get successful service 'request'.
-            /// A value of -1.0 means the customer has not 
-            /// received the service and is waiting in queue.
-            /// </summary>
-            /// <returns></returns>
-            public double ActualWaitTime { get; set; }
-
-            /// <summary>
-            /// The time at which the customer gets into the queue
-            /// to receive to receive service from the provider.
-            /// There may be no queue which means the customer will
-            /// be able to request service immediately
-            /// </summary>
-            /// <returns></returns>
-            public double QueueStartTime { get; set; }
-            
-            /// <summary>
-            /// The time at which the customer was able to successfully
-            /// request the service from the provider. The difference of
-            /// ServiceStartTime and QueueStartTime is the actual wait time
-            /// </summary>
-            /// <returns></returns>
-            public double ServiceStartTime { get; set; }
-            
-            public CustomerCurrentVisit()
+            public CurrentProviderVisit()
             {
                 this.SelectedProvider = null;
                 this.ActualWaitTime = -1.0;
@@ -76,16 +30,40 @@ namespace TrustMgmtSimulation.Entities
                 this.QueueStartTime = -1.0;
                 this.ServiceStartTime = -1.0;
             }
+
+            public void SetServiceStartTime(double serviceStartTime)
+            {
+                this.ServiceStartTime = serviceStartTime;
+                this.ActualWaitTime = this.ServiceStartTime - this.QueueStartTime;
+            }
+
+            public Visit GetVisit()
+            {
+                return new Visit(SelectedProvider, AdvertisedWaitTime, ProjectedWaitTime, QueueStartTime, ServiceStartTime);
+            }
             
         }
+
+        /*
+        /// <summary>
+        /// The history of all the visits by a customer to different service providers
+        /// </summary>
+        public class VisitHistory
+        {
+
+        }
+        */
             
         #endregion
 
-        private CustomerCurrentVisit currentVisit = new CustomerCurrentVisit();
+        private CurrentProviderVisit currentVisit = new CurrentProviderVisit();
 
         public int Id { get; set; }
         
         public bool IsMalicious { get; set; }
+
+        public List<Visit> VisitHistory { get; set; }
+        
 
         public void InstantiateCurrentVisit(Provider selectedProvider, double advertisedWaitTime, double projectedWaitTime, double queueStartTime)
         {
@@ -100,8 +78,7 @@ namespace TrustMgmtSimulation.Entities
             if(currentVisit.SelectedProvider == null)
                 throw new InvalidOperationException("Current visit SelectedProvider is null. Cannot set Service Start Time.");
             
-            currentVisit.ServiceStartTime = serviceStartTime;
-            currentVisit.ActualWaitTime = currentVisit.ServiceStartTime - currentVisit.QueueStartTime;
+            this.currentVisit.SetServiceStartTime(serviceStartTime);
         }
 
         //TODO: 

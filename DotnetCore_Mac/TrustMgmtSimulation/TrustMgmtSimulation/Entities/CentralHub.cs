@@ -11,6 +11,7 @@ namespace TrustMgmtSimulation.Entities
         //      3. Provide a method to instantiate providers and customers
         //          - read different arguments and parameters (hardcoded or user input) and do initial setup
         //          - may be not instantiate customers but definitely providers
-        //          - even though not its actual job, central hub should
+        //          - even though not its actual job, central hub should setup malicious and non-malicous SP 
+        //            and SR because this seems to be the best (single) place to do it
     }
 }
