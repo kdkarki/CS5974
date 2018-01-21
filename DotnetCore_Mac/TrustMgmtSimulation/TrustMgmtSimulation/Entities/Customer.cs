@@ -62,8 +62,7 @@ namespace TrustMgmtSimulation.Entities
         
         public bool IsMalicious { get; set; }
 
-        public List<Visit> VisitHistory { get; set; }
-        
+        public List<Visit> VisitHistory { get; set; }        
 
         public void InstantiateCurrentVisit(Provider selectedProvider, double advertisedWaitTime, double projectedWaitTime, double queueStartTime)
         {

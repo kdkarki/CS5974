@@ -6,6 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Libraries\" />
+    <Folder Include="Libraries\" CopyToOutputDirectory="Always" />
   </ItemGroup>
 </Project>

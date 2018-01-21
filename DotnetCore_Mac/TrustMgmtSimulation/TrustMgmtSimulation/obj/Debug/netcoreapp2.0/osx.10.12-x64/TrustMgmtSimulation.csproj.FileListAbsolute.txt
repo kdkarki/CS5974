@@ -1,0 +1,13 @@
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/osx.10.12-x64/libhostpolicy.dylib
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/osx.10.12-x64/libhostfxr.dylib
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.deps.json
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.runtimeconfig.json
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.runtimeconfig.dev.json
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.dll
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/bin/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.pdb
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.csproj.CoreCompileInputs.cache
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.AssemblyInfoInputs.cache
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.AssemblyInfo.cs
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.dll
+/Users/Snehi/Projects/kdkarki/CS5974.git/DotnetCore_Mac/TrustMgmtSimulation/TrustMgmtSimulation/obj/Debug/netcoreapp2.0/osx.10.12-x64/TrustMgmtSimulation.pdb

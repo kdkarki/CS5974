@@ -65,5 +65,17 @@ namespace TrustMgmtSimulation.Entities
                 if(qStarTime > -1.0) //this means the customer attempted to recieve service
                     this.ActualWaitTime = servStartTime - qStarTime;
             }
+
+            /// <summary>
+            /// A customer may get in queue but leave before receiving service from the provider
+            /// because the customer waited more than the wait time threshold.
+            /// In that case the customer should still record the wait time experienced 
+            /// which is the wait time threshold.
+            /// </summary>
+            /// <param name="actualWaitTime">The actual wait time experienced by customer</param>
+            public void SetActualWaitTime(double actualWaitTime)
+            {
+                this.ActualWaitTime = actualWaitTime;
+            }
     }
 }
