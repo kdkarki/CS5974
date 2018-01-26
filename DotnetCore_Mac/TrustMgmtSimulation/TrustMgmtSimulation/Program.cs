@@ -19,6 +19,7 @@ namespace TrustMgmtSimulation
                    maliciouPercent = 30;            //the malicious SRs and SPs. Parameter P_m
 
         static DecisionPolicyType decisionPolicy = DecisionPolicyType.LeastBusyAmongMostTrustworthy;
+        static Protocols.ITrustProtocol trustProtocol = new Protocols.OurTrustProtocol();
 
         static void Main(string[] args)
         {
@@ -31,10 +32,13 @@ namespace TrustMgmtSimulation
             Console.WriteLine("*\tStarting the simulation for CS5974");
             Console.WriteLine("*\tTrust-based Service Community Management: A Case Study");
             Console.WriteLine("******************************************************************");
-
             
             SetParameters(args);
             
+            //TODO:
+            //InstantiateServiceProviders();
+            
+            //InstantiateCustomers();
 
         }
 
@@ -44,14 +48,16 @@ namespace TrustMgmtSimulation
             isTotalExecutionTimeSet = false, 
             isParamRSet = false, 
             isMaliciousnessSet = false, 
-            isDecisionPolicySet = false;
+            isDecisionPolicySet = false,
+            isTrustProtocolSet = false;
 
-            int reportIndex = Array.IndexOf(args, "-r") == -1 ? Array.IndexOf(args, "-R") : -1;
-            int exeTimeIndex = Array.IndexOf(args, "-t") == -1 ? Array.IndexOf(args, "-T") : -1;
-            int paramRIndex = Array.IndexOf(args, "-f") == -1 ? Array.IndexOf(args, "-F") : -1;
-            int maliciousIndex = Array.IndexOf(args, "-m") == -1 ? Array.IndexOf(args, "-M") : -1;
-            int decisionPolicyIndex = Array.IndexOf(args, "-d") == -1 ? Array.IndexOf(args, "-D") : -1;
-            int acceptDefaultIndex = Array.IndexOf(args, "-y") == -1 ? Array.IndexOf(args, "-Y") : -1;
+            int reportIndex = Array.IndexOf(args, "-r") == -1 ? Array.IndexOf(args, "-R") : Array.IndexOf(args, "-r");
+            int exeTimeIndex = Array.IndexOf(args, "-t") == -1 ? Array.IndexOf(args, "-T") : Array.IndexOf(args, "-t");
+            int paramRIndex = Array.IndexOf(args, "-f") == -1 ? Array.IndexOf(args, "-F") : Array.IndexOf(args, "-f");
+            int maliciousIndex = Array.IndexOf(args, "-m") == -1 ? Array.IndexOf(args, "-M") : Array.IndexOf(args, "-m");
+            int decisionPolicyIndex = Array.IndexOf(args, "-d") == -1 ? Array.IndexOf(args, "-D") : Array.IndexOf(args, "-d");
+            int acceptDefaultIndex = Array.IndexOf(args, "-y") == -1 ? Array.IndexOf(args, "-Y") : Array.IndexOf(args, "-y");
+            int trustProtocolIndex = Array.IndexOf(args, "-p") == -1 ? Array.IndexOf(args, "-P") : Array.IndexOf(args, "-p");
 
 
             if(reportIndex != -1)
@@ -85,21 +91,39 @@ namespace TrustMgmtSimulation
             if(decisionPolicyIndex != -1)
             {
                 isDecisionPolicySet = true;
-                switch(args[decisionPolicyIndex + 1])
+                switch(args[decisionPolicyIndex + 1].ToLower())
                 {
-                    case "LBSP":
+                    case "lbsp": 
                     decisionPolicy = DecisionPolicyType.LeastBusySP;
                     break;
-                    case "MTSP":
+                    case "mtsp":
                     decisionPolicy = DecisionPolicyType.MostTrustworthySP;
                     break;
-                    case "LBMT":
+                    case "lbmt":
                     decisionPolicy = DecisionPolicyType.LeastBusyAmongMostTrustworthy;
                     break;
                     default:
                     isDecisionPolicySet = false;
                     break;
 
+                }
+            }
+            if(trustProtocolIndex != -1)
+            {
+                isTrustProtocolSet = true;
+                switch(args[trustProtocolIndex + 1].ToLower())
+                {
+                    case "o": case "our":
+                    //trustProtocol = new Protocols.OurTrustProtocol();
+                    break;
+                    case "b": case "beta":
+                    trustProtocol = new Protocols.BetaReputation();
+                    break;
+                    case "n": case "notrust":
+                    trustProtocol = new Protocols.NonTrustBased();
+                    break;
+                    default:
+                    break;
                 }
             }
 
@@ -112,6 +136,7 @@ namespace TrustMgmtSimulation
                 isMaliciousnessSet = true;
                 isReportSet = true;
                 isTotalExecutionTimeSet = true;
+                isTrustProtocolSet = true;
                 return;
             }
 
@@ -125,22 +150,30 @@ namespace TrustMgmtSimulation
                 if(!isDecisionPolicySet)
                 {
                     Console.WriteLine(String.Format("\td: Decision Policy. Default value: {0}", decisionPolicy.ToString()));
-                }if(!isMaliciousnessSet)
+                }
+                if(!isMaliciousnessSet)
                 {
                     Console.WriteLine(String.Format("\tm: Maliciousness. Default value: {0}", maliciouPercent));
-                }if(!isParamRSet)
+                }
+                if(!isParamRSet)
                 {
                     Console.WriteLine(String.Format("\tf: Risk Factor. Default value: {0}", riskFactor));
-                }if(!isTotalExecutionTimeSet)
+                }
+                if(!isTotalExecutionTimeSet)
                 {
                     Console.WriteLine(String.Format("\tt: Total Execution Time (hrs). Default value: {0}", totalExecutionTime));
                 }
+                if(!isTrustProtocolSet)
+                {
+                    Console.WriteLine(String.Format("\tp: Trust Protocol. Default value: {0}", trustProtocol.ToString()));
+                }
+                
 
                 Console.WriteLine("\ty: Accept default values");
 
                 char userSelection = Console.ReadKey().KeyChar;
                 Console.WriteLine();
-                var possibleValues = new []{'d', 'D', 'f', 'F', 'm', 'M', 'r', 'R', 't', 'T', 'y', 'Y'};
+                var possibleValues = new []{'d', 'D', 'f', 'F', 'm', 'M', 'p', 'P', 'r', 'R', 't', 'T', 'y', 'Y'};
                 if(!possibleValues.Contains(userSelection))
                 {
                     Console.WriteLine("Select a correct option!");
@@ -211,6 +244,9 @@ namespace TrustMgmtSimulation
                         isMaliciousnessSet = true;
                         break;
                     }
+                    break;
+                    case 'p': case 'P':
+                    //TODO: ask user for protocol to be used.
                     break;
                     case 'r': case 'R':
                     while(true)
