@@ -1,9 +1,18 @@
 
 namespace TrustMgmtSimulation.Entities
 {
-    public class Feedback
+    /// <summary>
+    /// Base feedback class that will be derived into SR-feedback and SP-feeback
+    /// </summary>
+    public abstract class Feedback
     {
-        //TODO: Define a base feedback class that can then be derived into
-        //      SR feedback and SP feedback
+        public int TotalFeedbacks { get; set; }
+        
+        public double PositiveFeedbacks { get; internal set; }
+        
+        public double NegativeFeedbacks { get; internal set; }
+
+        public abstract double UpdateFeedbacks(double? newPositiveFeedback, double? newNegativeFeedback);
+        
     }
 }
