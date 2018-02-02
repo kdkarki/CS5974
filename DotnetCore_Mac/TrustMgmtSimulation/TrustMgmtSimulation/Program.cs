@@ -232,12 +232,12 @@ namespace TrustMgmtSimulation
                     case 'm': case 'M':
                     while(true)
                     {
-                        Console.WriteLine("Enter Maliciousness value. Accepted range is 0 - 100.");
+                        Console.WriteLine("Enter Maliciousness value. Accepted values are 0, 10, 30, and 50.");
                         string malUserInput = Console.ReadLine();
                         int mal = -1;
-                        if(!Int32.TryParse(malUserInput, out mal) || mal < 0 || mal > 100)
+                        if(!Int32.TryParse(malUserInput, out mal) || (!new [] {0, 10, 30, 50}.Any(mal.Equals)))
                         {
-                            Console.WriteLine("Enter a correct maliciouness value between 0 and 100.");
+                            Console.WriteLine("Enter a correct maliciouness value.");
                             continue;
                         }
                         maliciouPercent = mal;
@@ -246,7 +246,33 @@ namespace TrustMgmtSimulation
                     }
                     break;
                     case 'p': case 'P':
-                    //TODO: ask user for protocol to be used.
+                    while(true)
+                    {
+                        Console.WriteLine("Enter Trust Protocol.");
+                        Console.WriteLine("\tn or notrust: Non-Trust Based Protocol");
+                        Console.WriteLine("\tb or beta: Josang's Beta Reputation System");
+                        Console.WriteLine("\to or our: Our Proposed Trust Protocol");
+                        string protocolUserInput = Console.ReadLine();
+                        isTrustProtocolSet = true;
+                        switch(protocolUserInput.ToLower())
+                        {
+                            case "o": case "our":
+                            //trustProtocol = new Protocols.OurTrustProtocol();
+                            break;
+                            case "b": case "beta":
+                            trustProtocol = new Protocols.BetaReputation();
+                            break;
+                            case "n": case "notrust":
+                            trustProtocol = new Protocols.NonTrustBased();
+                            break;
+                            default:
+                            isTrustProtocolSet = false;
+                            Console.WriteLine("Enter corrent trust protocol");
+                            break;
+                        }
+                        if(isTrustProtocolSet)
+                            break;
+                    }
                     break;
                     case 'r': case 'R':
                     while(true)
