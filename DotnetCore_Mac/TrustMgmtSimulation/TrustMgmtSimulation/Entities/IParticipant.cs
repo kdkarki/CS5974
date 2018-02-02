@@ -4,8 +4,8 @@ namespace TrustMgmtSimulation.Entities
 {
     public interface IParticipant
     {
-        int Id { get; set; }
+        int Id { get; }
         
-        bool IsMalicious { get; set; }
+        bool IsMalicious { get; }
     }
 }
