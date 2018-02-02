@@ -58,11 +58,18 @@ namespace TrustMgmtSimulation.Entities
 
         private CurrentProviderVisit currentVisit = new CurrentProviderVisit();
 
-        public int Id { get; set; }
+        public int Id { get; private set; }
         
         public bool IsMalicious { get; set; }
 
-        public List<Visit> VisitHistory { get; set; }        
+        public List<Visit> VisitHistory { get; set; }
+
+        public Customer(int id, bool isMalicious)
+        {
+            this.Id = id;
+            this.IsMalicious = isMalicious;
+            this.VisitHistory = new List<Visit>();
+        }
 
         public void InstantiateCurrentVisit(Provider selectedProvider, double advertisedWaitTime, double projectedWaitTime, double queueStartTime)
         {
