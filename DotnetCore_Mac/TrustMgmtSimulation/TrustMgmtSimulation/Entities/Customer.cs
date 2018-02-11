@@ -62,6 +62,8 @@ namespace TrustMgmtSimulation.Entities
         
         public bool IsMalicious { get; set; }
 
+        public bool IsCurrentProviderSelected => this.currentVisit.SelectedProvider != null;
+
         public List<Visit> VisitHistory { get; set; }
 
         public Customer(int id, bool isMalicious)

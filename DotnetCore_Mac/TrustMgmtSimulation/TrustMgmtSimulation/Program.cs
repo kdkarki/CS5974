@@ -14,9 +14,11 @@ namespace TrustMgmtSimulation
     {
         //set the variables with default values
         static double totalExecutionTime = 1015.00, //total time the simulation runs
-                      riskFactor = 1.0;             //the wait time offset reported by a malicious SP
+                      riskFactor = 1.0,             //the wait time offset reported by a malicious SP
+                      customerArrivalTime = 10.00,  //T_a: customer arrival time
+                      providerServiceTime = 1.0;            //T_s: service provider service time
         static int reportNumber = 1,                //the report to be generated
-                   maliciouPercent = 30;            //the malicious SRs and SPs. Parameter P_m
+                   maliciousPercent = 30;            //the malicious SRs and SPs. Parameter P_m
 
         static DecisionPolicyType decisionPolicy = DecisionPolicyType.LeastBusyAmongMostTrustworthy;
         static Protocols.ITrustProtocol trustProtocol = new Protocols.OurTrustProtocol();
@@ -34,11 +36,10 @@ namespace TrustMgmtSimulation
             Console.WriteLine("******************************************************************");
             
             SetParameters(args);
+
+            SimulationManager simMgr = new SimulationManager(10, 20, 2200, maliciousPercent, customerArrivalTime, providerServiceTime, trustProtocol);
             
-            //TODO:
-            //InstantiateServiceProviders();
-            
-            //InstantiateCustomers();
+            simMgr.RunSimulation(totalExecutionTime);
 
         }
 
@@ -83,7 +84,7 @@ namespace TrustMgmtSimulation
             }
             if(maliciousIndex != -1)
             {
-                if(Int32.TryParse(args[maliciousIndex + 1], out maliciouPercent))
+                if(Int32.TryParse(args[maliciousIndex + 1], out maliciousPercent))
                 {
                     isMaliciousnessSet = true;
                 }
@@ -153,7 +154,7 @@ namespace TrustMgmtSimulation
                 }
                 if(!isMaliciousnessSet)
                 {
-                    Console.WriteLine(String.Format("\tm: Maliciousness. Default value: {0}", maliciouPercent));
+                    Console.WriteLine(String.Format("\tm: Maliciousness. Default value: {0}", maliciousPercent));
                 }
                 if(!isParamRSet)
                 {
@@ -171,7 +172,9 @@ namespace TrustMgmtSimulation
 
                 Console.WriteLine("\ty: Accept default values");
 
-                char userSelection = Console.ReadKey().KeyChar;
+                char userSelection = 'y';
+                if(!System.Diagnostics.Debugger.IsAttached)
+                    userSelection = Console.ReadKey().KeyChar;
                 Console.WriteLine();
                 var possibleValues = new []{'d', 'D', 'f', 'F', 'm', 'M', 'p', 'P', 'r', 'R', 't', 'T', 'y', 'Y'};
                 if(!possibleValues.Contains(userSelection))
@@ -240,7 +243,7 @@ namespace TrustMgmtSimulation
                             Console.WriteLine("Enter a correct maliciouness value.");
                             continue;
                         }
-                        maliciouPercent = mal;
+                        maliciousPercent = mal;
                         isMaliciousnessSet = true;
                         break;
                     }
@@ -323,7 +326,7 @@ namespace TrustMgmtSimulation
         {
             Console.WriteLine("Simulation configuration:");
             Console.WriteLine(String.Format("\tReport (figure) #: {0}\n\tDecision Policy: {1}\n\tMaliciousness % (P_m): {2}\n\tTotal Simulation Time (hrs): {3:0.00}\n\tRisk Factor (R_f): {4:0.00}\n\n",
-                                            reportNumber, decisionPolicy.ToString(), maliciouPercent, totalExecutionTime, riskFactor));
+                                            reportNumber, decisionPolicy.ToString(), maliciousPercent, totalExecutionTime, riskFactor));
         } 
     }
 }
