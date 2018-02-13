@@ -39,7 +39,7 @@ namespace TrustMgmtSimulation
          * in  "Approximations for Digital Computers", C. Hastings, Jr.,      *
          * Princeton U. Press, 1955. 
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "Z")]
+        [DllImport("./libsmpl.so", EntryPoint = "Z")]
         public static extern double Z(double p);
 
         /*-----------  COMPUTE pth QUANTILE OF THE t DISTRIBUTION  -----------*
@@ -49,7 +49,7 @@ namespace TrustMgmtSimulation
          * of the 'STUDTP' function given in Appendix C of  "Principles       *
          * of Discrete Event Simulation", G. S. Fishman, Wiley, 1978.   
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "T")]
+        [DllImport("./libsmpl.so", EntryPoint = "T")]
         public static extern double T(double p, int ndf);
 
         /* ------------------------------------------------------------------ */
@@ -61,34 +61,34 @@ namespace TrustMgmtSimulation
         /*--------------------  SELECT GENERATOR STREAM  ---------------------*
          * set stream for 1<=n<=15, return stream for n=0 
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "stream")]
+        [DllImport("./libsmpl.so", EntryPoint = "stream")]
         public static extern int stream(int n);
 
         /*--------------------------  SET/GET SEED  --------------------------*
          * set seed of stream n for Ik>0, return current seed for Ik=0        
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "seed")]
+        [DllImport("./libsmpl.so", EntryPoint = "seed")]
         public static extern long seed(long Ik, int n);
 
         /*------------  UNIFORM [a, b] RANDOM VARIATE GENERATOR  -------------* 
          * 'uniform' returns a psuedo-random variate from a uniform           * 
          * distribution with lower bound a and upper bound b.                 
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "uniform")]
+        [DllImport("./libsmpl.so", EntryPoint = "uniform")]
         public static extern double uniform(double a, double b);
 
         /*--------------------  RANDOM INTEGER GENERATOR  --------------------*
          * 'random' returns an integer equiprobably selected from the         *
          * set of integers i, i+1, i+2, . . , n.                              
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "random")]
+        [DllImport("./libsmpl.so", EntryPoint = "random")]
         public static extern int random(int i, int n);
 
         /*--------------  EXPONENTIAL RANDOM VARIATE GENERATOR  --------------*
          * 'expntl' returns a psuedo-random variate from a negative           *
          * exponential distribution with mean x.                              
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "expntl")]
+        [DllImport("./libsmpl.so", EntryPoint = "expntl")]
         public static extern double expntl(double x);
 
         /*----------------  ERLANG RANDOM VARIATE GENERATOR  -----------------*
@@ -96,14 +96,14 @@ namespace TrustMgmtSimulation
          * hyperexponential distribution with mean x and 
          * standard deviation s, s>x.
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "hyperx")]
+        [DllImport("./libsmpl.so", EntryPoint = "hyperx")]
         public static extern double hyperx(double x, double s);
 
         /*-----------------  NORMAL RANDOM VARIATE GENERATOR  ----------------*
          * 'normal' returns a psuedo-random variate from a normal distribution*
          * with mean x and standard deviation s.                              *
          */
-        [DllImport("./libsmpl.dylib", EntryPoint = "normal")]
+        [DllImport("./libsmpl.so", EntryPoint = "normal")]
         public static extern double normal(double x, double s);
 
         /* ------------------------------------------------------------------ */
@@ -115,17 +115,17 @@ namespace TrustMgmtSimulation
         /*------------------------  INITIALIZE BEMANS  -----------------------*
          * set deletion amount & batch size                                   *
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "init_bm")]
+        [DllImport("./libsmpl.so", EntryPoint = "init_bm")]
         public static extern void init_bm(int m0, int mb);
 
         /*-------------------------------  OBS  ------------------------------*
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "obs")]
+        [DllImport("./libsmpl.so", EntryPoint = "obs")]
         public static extern int obs(double y);
 
         /*------------------------------  CIVALS  ----------------------------*
         */
-        [DllImport("./libsmpl.dylib", EntryPoint = "civals")]
+        [DllImport("./libsmpl.so", EntryPoint = "civals")]
         public static extern void civals(ref double mean, ref double hw, ref int nb);
 
         /* ------------------------------------------------------------------ */
@@ -136,25 +136,25 @@ namespace TrustMgmtSimulation
 
 
         /*---------------  INITIALIZE SIMULATION SUBSYSTEM  ------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "smpl")]
+        [DllImport("./libsmpl.so", EntryPoint = "smpl")]
         public static extern void smpl(int id, string moduleName);
 
         /*---------------------------  SAVE NAME  ----------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "reset")]
+        [DllImport("./libsmpl.so", EntryPoint = "reset")]
         public static extern void reset();
 
         /*---------------------------  SAVE NAME  ----------------------------*/
         //TODO: This function is defined as static int save_name(char *s, int m)
         //      So not sure if this is the right way to p/invoke this.
-        [DllImport("./libsmpl.dylib", EntryPoint = "save_name")]
+        [DllImport("./libsmpl.so", EntryPoint = "save_name")]
         public static extern int save_name(string s, int m);
 
         /*-------------------------  GET MODEL NAME  -------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "mname")]
+        [DllImport("./libsmpl.so", EntryPoint = "mname")]
         public static extern string mname();
 
         /*------------------------  GET FACILITY NAME  -----------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "fname")]
+        [DllImport("./libsmpl.so", EntryPoint = "fname")]
         public static extern string fname(int f);
 
         //TODO: Following function not wrapped because they are defined static
@@ -163,15 +163,15 @@ namespace TrustMgmtSimulation
         //      put_elm : RETURN ELEMENT
 
         /*-------------------------  SCHEDULE EVENT  -------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "schedule")]
+        [DllImport("./libsmpl.so", EntryPoint = "schedule")]
         public static extern void schedule(int ev, double te, int tkn);
 
         /*---------------------------  CAUSE EVENT  --------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "cause")]
+        [DllImport("./libsmpl.so", EntryPoint = "cause")]
         public static extern void cause(ref int ev, ref int tkn);
 
         /*--------------------------  RETURN TIME  ---------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "time")]
+        [DllImport("./libsmpl.so", EntryPoint = "time")]
         public static extern double time();
 
         /*--------------------------  CANCEL EVENT  --------------------------*/
@@ -180,85 +180,85 @@ namespace TrustMgmtSimulation
         /// </summary>
         /// <returns>The id of the token (customer)</returns>
         /// <param name="ev">Event id.</param>
-        [DllImport("./libsmpl.dylib", EntryPoint = "cancel")]
+        [DllImport("./libsmpl.so", EntryPoint = "cancel")]
         public static extern int cancel(int ev);
 
         /*-------------------------  SUSPEND EVENT  --------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "suspend")]
+        [DllImport("./libsmpl.so", EntryPoint = "suspend")]
         public static extern int suspend(int tkn);
 
         //TODO: static void enlist(int *head, int elm) not wrapped
 
         /*-------------------------  DEFINE FACILITY  ------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "facility")]
+        [DllImport("./libsmpl.so", EntryPoint = "facility")]
         public static extern int facility(string s, int n);
 
         //TODO: static void resetf() not wrapped
 
         /*------------------------  REQUEST FACILITY  ------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "request")]
+        [DllImport("./libsmpl.so", EntryPoint = "request")]
         public static extern int request(int f, int tkn, int pri);
 
         //TODO: static void enque(int f, int j, int pri, int env, real te) nw/
 
         /*------------------------  PREEMPT FACILITY  ------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "preempt")]
+        [DllImport("./libsmpl.so", EntryPoint = "preempt")]
         public static extern int preempt(int f, int tkn, int pri);
 
         /*------------------------  RELEASE FACILITY  ------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "release")]
+        [DllImport("./libsmpl.so", EntryPoint = "release")]
         public static extern void release(int f, int tkn);
 
         /*-----------------------  GET FACILITY STATUS  ----------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "status")]
+        [DllImport("./libsmpl.so", EntryPoint = "status")]
         public static extern int status(int f);
 
         /*--------------------  GET CURRENT QUEUE LENGTH  --------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "inq")]
+        [DllImport("./libsmpl.so", EntryPoint = "inq")]
         public static extern int inq(int f);
 
         /*--------------------  GET FACILITY UTILIZATION  --------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "U")]
+        [DllImport("./libsmpl.so", EntryPoint = "U")]
         public static extern double U(int f);
 
         /*----------------------  GET MEAN BUSY PERIOD  ----------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "B")]
+        [DllImport("./libsmpl.so", EntryPoint = "B")]
         public static extern double B(int f);
 
         /*--------------------  GET AVERAGE QUEUE LENGTH  --------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "Lq")]
+        [DllImport("./libsmpl.so", EntryPoint = "Lq")]
         public static extern double Lq(int f);
 
         /*-----------------------  TURN TRACE ON/OFF  ------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "trace")]
+        [DllImport("./libsmpl.so", EntryPoint = "trace")]
         public static extern void trace(int n);
 
         /*-----------------------------  PAUSE  ------------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "smpl_pause")]
+        [DllImport("./libsmpl.so", EntryPoint = "smpl_pause")]
         public static extern void smpl_pause();
 
         /*------------------  DISPLAY ERROR MESSAGE & EXIT  ------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "error")]
+        [DllImport("./libsmpl.so", EntryPoint = "error")]
         public static extern void error(int n, string s);
 
         /*------------------------  GENERATE REPORT  -------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "report")]
+        [DllImport("./libsmpl.so", EntryPoint = "report")]
         public static extern void report();
 
         /*--------------------  GENERATE FACILITY REPORT  --------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "reportf")]
+        [DllImport("./libsmpl.so", EntryPoint = "reportf")]
         public static extern void reportf();
 
         /*---------------------------  COUNT LINES  --------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "lns")]
+        [DllImport("./libsmpl.so", EntryPoint = "lns")]
         public static extern int lns(int i);
 
         /*----------------------------  END PAGE  ----------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "endpage")]
+        [DllImport("./libsmpl.so", EntryPoint = "endpage")]
         public static extern void endpage();
 
         /*----------------------------  NEW PAGE  ----------------------------*/
-        [DllImport("./libsmpl.dylib", EntryPoint = "newpage")]
+        [DllImport("./libsmpl.so", EntryPoint = "newpage")]
         public static extern void newpage();
 
         //TODO: File *sendto(FILE *dest) -> need to be wrapped

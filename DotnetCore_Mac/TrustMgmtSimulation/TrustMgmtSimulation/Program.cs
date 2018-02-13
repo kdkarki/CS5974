@@ -21,7 +21,7 @@ namespace TrustMgmtSimulation
                    maliciousPercent = 30;            //the malicious SRs and SPs. Parameter P_m
 
         static DecisionPolicyType decisionPolicy = DecisionPolicyType.LeastBusyAmongMostTrustworthy;
-        static Protocols.ITrustProtocol trustProtocol = new Protocols.OurTrustProtocol();
+        static Protocols.ITrustProtocol trustProtocol = new Protocols.OurTrustProtocol(riskFactor);
 
         static void Main(string[] args)
         {
@@ -115,13 +115,13 @@ namespace TrustMgmtSimulation
                 switch(args[trustProtocolIndex + 1].ToLower())
                 {
                     case "o": case "our":
-                    //trustProtocol = new Protocols.OurTrustProtocol();
+                    trustProtocol = new Protocols.OurTrustProtocol(riskFactor);
                     break;
                     case "b": case "beta":
-                    trustProtocol = new Protocols.BetaReputation();
+                    trustProtocol = new Protocols.BetaReputation(riskFactor);
                     break;
                     case "n": case "notrust":
-                    trustProtocol = new Protocols.NonTrustBased();
+                    trustProtocol = new Protocols.NonTrustBased(riskFactor);
                     break;
                     default:
                     break;
@@ -260,13 +260,13 @@ namespace TrustMgmtSimulation
                         switch(protocolUserInput.ToLower())
                         {
                             case "o": case "our":
-                            //trustProtocol = new Protocols.OurTrustProtocol();
+                            trustProtocol = new Protocols.OurTrustProtocol(riskFactor);
                             break;
                             case "b": case "beta":
-                            trustProtocol = new Protocols.BetaReputation();
+                            trustProtocol = new Protocols.BetaReputation(riskFactor);
                             break;
                             case "n": case "notrust":
-                            trustProtocol = new Protocols.NonTrustBased();
+                            trustProtocol = new Protocols.NonTrustBased(riskFactor);
                             break;
                             default:
                             isTrustProtocolSet = false;

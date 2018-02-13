@@ -4,9 +4,14 @@ using TrustMgmtSimulation.Entities;
 
 namespace TrustMgmtSimulation.Protocols
 {
-    public class NonTrustBased : ITrustProtocol
+    public class NonTrustBased : TrustProtocol
     {
-        public (Provider selectedProvider, double selectedProviderActualWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime, double riskFactor)
+        public NonTrustBased(double riskFactor) : base(riskFactor)
+        {
+
+        }
+        
+        public override (Provider selectedProvider, double selectedProviderActualWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime)
         {
             if(providerList == null || providerList.Count < 1)
             {
@@ -14,11 +19,11 @@ namespace TrustMgmtSimulation.Protocols
             }
             List<Provider> leastBusyProviders = new List<Provider>();
             
-            var selectedProviderAdvWaitTime = providerList[0].GetCurrentAdvertisedWaitTime(currentTime, riskFactor);
+            var selectedProviderAdvWaitTime = providerList[0].GetCurrentAdvertisedWaitTime(currentTime, RiskFactor);
             leastBusyProviders.Add(providerList[0]);
             for(int i = 1; i < providerList.Count; i++)
             {
-                var advWaitTime = providerList[i].GetCurrentAdvertisedWaitTime(currentTime, riskFactor);
+                var advWaitTime = providerList[i].GetCurrentAdvertisedWaitTime(currentTime, RiskFactor);
                 if(advWaitTime < selectedProviderAdvWaitTime)
                 {
                     leastBusyProviders.Clear();

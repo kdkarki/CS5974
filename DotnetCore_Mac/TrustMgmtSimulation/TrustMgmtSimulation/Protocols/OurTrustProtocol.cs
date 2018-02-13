@@ -3,9 +3,14 @@ using System.Collections.Generic;
 
 namespace TrustMgmtSimulation.Protocols
 {
-    public class OurTrustProtocol : ITrustProtocol
+    public class OurTrustProtocol : TrustProtocol
     {
-        public (Provider selectedProvider, double selectedProviderActualWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime, double riskFactor)
+        public OurTrustProtocol(double riskFactor) : base(riskFactor)
+        {
+
+        }
+        
+        public override (Provider selectedProvider, double selectedProviderActualWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime)
         {
             return (null, 0.0);
         }

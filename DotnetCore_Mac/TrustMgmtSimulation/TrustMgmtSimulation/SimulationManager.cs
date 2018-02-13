@@ -135,16 +135,17 @@ namespace TrustMgmtSimulation
             //initialize customers
             initializeCustomers(_customerCount, _maliciousPercent, _Ta);
 
-            /*int cToken = -1, simEvent = -1;
-
+            //int cToken = -1, simEvent = -1;
+            /*
             while(SMPLWrapper.time() < totalExecutionTime)
             {
+                var currentTime = SMPLWrapper.time();
                 //cause an event to occur in smpl pipeline
                 SMPLWrapper.cause(ref simEvent, ref cToken);
-                Customer customer = customers.First(c => c.Id == cToken);//Select the customer by Id
+                Customer customer = _customers.First(c => c.Id == cToken);//Select the customer by Id
                 switch(simEvent)
                 {
-                    case 1: //arival of customer
+                    case 1: //arrival of customer
                     //as soon a the customer arrives (in our case it means as soon as a customer is interested in finding a service provider)
                     //then schedule the customer for event 2, which is where the customer determines the best service provider and attempts to
                     //request service from the provider
@@ -156,7 +157,7 @@ namespace TrustMgmtSimulation
                     // otherwise, the customer has just arrived and has not yet selected a SP for service
                     if(!customer.IsCurrentProviderSelected)// the customer has just arrived and has not selected a SP for service
                     {
-
+                        _trustProtocol.DetermineMostEligibleProvider(_serviceProviders, currentTime);
                     }
                     break;
                 }
