@@ -7,7 +7,7 @@ namespace TrustMgmtSimulation.Protocols
     {
         public double RiskFactor { get; private set; }
 
-        public abstract (Provider selectedProvider, double selectedProviderActualWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime);
+        public abstract (Provider selectedProvider, List<Witness> witnesses, double selectedProviderActualWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime);
 
         public TrustProtocol(double riskFactor)
         {

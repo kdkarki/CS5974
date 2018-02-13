@@ -159,7 +159,7 @@ namespace TrustMgmtSimulation
                     // otherwise, the customer has just arrived and has not yet selected a SP for service
                     if(!customer.IsCurrentProviderSelected)// the customer has just arrived and has not selected a SP for service
                     {
-                        var (selectedSP, selectedSPAdvWT, selectedSPPrjWT) = _trustProtocol.DetermineMostEligibleProvider(_serviceProviders, currentTime);
+                        var (selectedSP, witnessList, selectedSPAdvWT, selectedSPPrjWT) = _trustProtocol.DetermineMostEligibleProvider(_serviceProviders, currentTime);
 
                         //TODO: If projected wait time is over a threshold then reschedule the customer for another visit
                         //      because there are no service providers available at this time
@@ -170,7 +170,38 @@ namespace TrustMgmtSimulation
                         }
                         else
                         {
-                            customer.InstantiateCurrentVisit(selectedSP, selectedSPAdvWT, selectedSPPrjWT, currentTime);
+                            //initialize the current visit for the customer
+                            customer.InstantiateCurrentVisit(selectedSP, witnessList, selectedSPAdvWT, selectedSPPrjWT, currentTime);
+
+                            //update the service provider queue
+                            selectedSP.AddCustomerToQueue(customer, currentTime);
+                        }
+                    }
+                    else
+                    {
+                        //check if the customer has been waiting for too long, i.e. over the wait time threshold
+                        //if so then the customer should be rescheduled for a new arrival because the customer
+                        //wasted too much time waiting for a service that was falsely advertised.
+                        if((currentTime - customer.CurrentVisitQueueTime) > _waitTimeThreshold)
+                        {
+                            _serviceProviders.First(s => s.Id == customer.CurrentVisitSPId).RemoveAbandonedCustomerFromQueue(customer, currentTime);
+
+                            customer.AbandonCurrentServiceProvider();
+                            
+                            SMPLWrapper.schedule(1, _Ta, cToken);
+                        }
+                        else
+                        {
+                            //attempt service request from the SP
+                            if(SMPLWrapper.request(customer.CurrentVisitSPId, cToken, 0) == 0)
+                            {
+                                //the server request was success
+
+                                //set the customer current visit service time
+                                customer.SetCurrentVisitServiceStartTime(currentTime);
+
+                                SMPLWrapper.schedule(3, _Ts, cToken);
+                            }
                         }
                     }
                     break;

@@ -62,6 +62,26 @@ namespace TrustMgmtSimulation.Entities
         
         public bool IsMalicious { get; set; }
 
+        public int CurrentVisitSPId
+        {
+            get
+            {
+                if(currentVisit.SelectedProvider == null)
+                    throw new NullReferenceException($"There is no current service provider for customer: {this.Id}.");
+                return currentVisit.SelectedProvider.Id;
+            }
+        }
+
+        public double CurrentVisitQueueTime
+        {
+            get
+            {
+                if(currentVisit.SelectedProvider == null)
+                    throw new NullReferenceException($"There is no current service provider for customer: {this.Id}.");
+                return currentVisit.QueueStartTime;
+            }
+        }
+
         public bool IsCurrentProviderSelected => this.currentVisit.SelectedProvider != null;
 
         public List<Visit> VisitHistory { get; set; }
@@ -73,12 +93,16 @@ namespace TrustMgmtSimulation.Entities
             this.VisitHistory = new List<Visit>();
         }
 
-        public void InstantiateCurrentVisit(Provider selectedProvider, double advertisedWaitTime, double projectedWaitTime, double queueStartTime)
+        public void InstantiateCurrentVisit(Provider selectedProvider, List<Witness> witnessList, double advertisedWaitTime, double projectedWaitTime, double queueStartTime)
         {
             currentVisit.SelectedProvider = selectedProvider;
             currentVisit.AdvertisedWaitTime = advertisedWaitTime;
             currentVisit.ProjectedWaitTime = projectedWaitTime;
             currentVisit.QueueStartTime = queueStartTime;
+
+            //TODO: Need to implement witness 
+            //      Need to add current visit to visit history
+            throw new System.NotImplementedException();
         }
 
         public void SetCurrentVisitServiceStartTime(double serviceStartTime)
@@ -87,6 +111,16 @@ namespace TrustMgmtSimulation.Entities
                 throw new InvalidOperationException("Current visit SelectedProvider is null. Cannot set Service Start Time.");
             
             this.currentVisit.SetServiceStartTime(serviceStartTime);
+
+            //TODO: Need to rate/provide feedback to service provider and witnesses
+        }
+
+        public void AbandonCurrentServiceProvider()
+        {
+            if(currentVisit.SelectedProvider == null)
+                throw new NullReferenceException("The current service is null so cannot be ABANDONED!");
+            
+            throw new NotImplementedException();
         }
 
         //TODO: 

@@ -14,7 +14,7 @@ namespace TrustMgmtSimulation.Entities
 
         public double NextAvailTime { get; private set; }
 
-        public double[] QueueSlots { get; private set; }
+        private double[] QueueSlots { get; set; }
 
         public Provider(int id, bool isMalicious, int queueLength)
         {
@@ -44,6 +44,20 @@ namespace TrustMgmtSimulation.Entities
             }
 
             return advertisedWaitTime;
+        }
+
+        public void AddCustomerToQueue(Customer customer, double CurrentTime)
+        {
+            if(customer == null)
+                throw new System.ArgumentNullException("Null Customer cannot be added to service provider queue");
+            throw new System.NotImplementedException();
+        }
+
+        public void RemoveAbandonedCustomerFromQueue(Customer customer, double currentTime)
+        {
+            if(customer == null)
+                throw new System.ArgumentNullException("Null Customer cannot be added to service provider queue");
+            throw new System.NotImplementedException();
         }
                 
     }
