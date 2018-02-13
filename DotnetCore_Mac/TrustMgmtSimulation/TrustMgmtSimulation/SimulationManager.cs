@@ -12,7 +12,7 @@ namespace TrustMgmtSimulation
 
         int _providerCount = 0, _queueLength = 0, _customerCount = 0, _maliciousPercent = 0;
 
-        double _Ta = 0.0, _Ts = 0.0;
+        double _Ta = 0.0, _Ts = 0.0, _waitTimeThreshold = 0.0;
 
         ITrustProtocol _trustProtocol;
 
@@ -25,8 +25,9 @@ namespace TrustMgmtSimulation
         /// <param name="maliciousPercent">Total number of malicious actors (Providers and Customers) in the system</param>
         /// <param name="customerArrivalTime">Customer arrival average time</param>
         /// <param name="providerServiceTime">Average service time</param>
+        /// <param name="waitTimeThreshold">The wait time beyound which the customer will abandon SP</param>
         /// <param name="trustProtocol">The type of trust protocol</param>
-        public SimulationManager(int providerCount, int queueLength, int customerCount, int maliciousPercent, double customerArrivalTime, double providerServiceTime, Protocols.ITrustProtocol trustProtocol)
+        public SimulationManager(int providerCount, int queueLength, int customerCount, int maliciousPercent, double customerArrivalTime, double providerServiceTime, double waitTimeThreshold, Protocols.ITrustProtocol trustProtocol)
         {
             _providerCount = providerCount;
             _queueLength = queueLength;
@@ -34,6 +35,7 @@ namespace TrustMgmtSimulation
             _maliciousPercent = maliciousPercent;
             _Ta = customerArrivalTime;
             _Ts = providerServiceTime;
+            _waitTimeThreshold = waitTimeThreshold;
             _trustProtocol = trustProtocol;            
         }
 
@@ -128,15 +130,15 @@ namespace TrustMgmtSimulation
             
             //initialize SMPL
             SMPLWrapper.smpl(0, "5974: Non-Trust Based");
-
+            //SMPLWrapper.trace(3);
             //initialize service providers
             initializeProviders(_providerCount, _queueLength, _maliciousPercent);
 
             //initialize customers
             initializeCustomers(_customerCount, _maliciousPercent, _Ta);
-
-            //int cToken = -1, simEvent = -1;
             /*
+            int cToken = -1, simEvent = -1;
+            
             while(SMPLWrapper.time() < totalExecutionTime)
             {
                 var currentTime = SMPLWrapper.time();
@@ -157,7 +159,19 @@ namespace TrustMgmtSimulation
                     // otherwise, the customer has just arrived and has not yet selected a SP for service
                     if(!customer.IsCurrentProviderSelected)// the customer has just arrived and has not selected a SP for service
                     {
-                        _trustProtocol.DetermineMostEligibleProvider(_serviceProviders, currentTime);
+                        var (selectedSP, selectedSPAdvWT, selectedSPPrjWT) = _trustProtocol.DetermineMostEligibleProvider(_serviceProviders, currentTime);
+
+                        //TODO: If projected wait time is over a threshold then reschedule the customer for another visit
+                        //      because there are no service providers available at this time
+                        if(selectedSPPrjWT > _waitTimeThreshold)
+                        {
+                            //schedule customer for new arrival
+                            SMPLWrapper.schedule(1, _Ta, cToken);
+                        }
+                        else
+                        {
+                            customer.InstantiateCurrentVisit(selectedSP, selectedSPAdvWT, selectedSPPrjWT, currentTime);
+                        }
                     }
                     break;
                 }

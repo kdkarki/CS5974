@@ -11,7 +11,7 @@ namespace TrustMgmtSimulation.Protocols
 
         }
         
-        public override (Provider selectedProvider, double selectedProviderActualWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime)
+        public override (Provider selectedProvider, double selectedProviderActualWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime)
         {
             if(providerList == null || providerList.Count < 1)
             {
@@ -37,11 +37,11 @@ namespace TrustMgmtSimulation.Protocols
             }
             if(leastBusyProviders.Count == 0)
             {
-                return (leastBusyProviders[0], selectedProviderAdvWaitTime);
+                return (leastBusyProviders[0], selectedProviderAdvWaitTime, selectedProviderAdvWaitTime);
             }
             else
             {
-                return(leastBusyProviders[SMPLWrapper.random(0, leastBusyProviders.Count - 1)], selectedProviderAdvWaitTime);
+                return(leastBusyProviders[SMPLWrapper.random(0, leastBusyProviders.Count - 1)], selectedProviderAdvWaitTime, selectedProviderAdvWaitTime);
             }
         }
     }

@@ -16,9 +16,10 @@ namespace TrustMgmtSimulation
         static double totalExecutionTime = 1015.00, //total time the simulation runs
                       riskFactor = 1.0,             //the wait time offset reported by a malicious SP
                       customerArrivalTime = 10.00,  //T_a: customer arrival time
-                      providerServiceTime = 1.0;            //T_s: service provider service time
+                      providerServiceTime = 1.0,    //T_s: service provider service time
+                      waitTimeThreshold = 1.0;      //A customer will abandon a SP if wait time is over this threshold
         static int reportNumber = 1,                //the report to be generated
-                   maliciousPercent = 30;            //the malicious SRs and SPs. Parameter P_m
+                   maliciousPercent = 30;           //the malicious SRs and SPs. Parameter P_m
 
         static DecisionPolicyType decisionPolicy = DecisionPolicyType.LeastBusyAmongMostTrustworthy;
         static Protocols.ITrustProtocol trustProtocol = new Protocols.OurTrustProtocol(riskFactor);
@@ -37,7 +38,7 @@ namespace TrustMgmtSimulation
             
             SetParameters(args);
 
-            SimulationManager simMgr = new SimulationManager(10, 20, 2200, maliciousPercent, customerArrivalTime, providerServiceTime, trustProtocol);
+            SimulationManager simMgr = new SimulationManager(10, 20, 2200, maliciousPercent, customerArrivalTime, providerServiceTime, waitTimeThreshold, trustProtocol);
             
             simMgr.RunSimulation(totalExecutionTime);
 
