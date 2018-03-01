@@ -191,9 +191,9 @@ namespace TrustMgmtSimulation
                         //wasted too much time waiting for a service that was falsely advertised.
                         if((currentTime - customer.CurrentVisitQueueTime) > _waitTimeThreshold)
                         {
-                            //_serviceProviders.First(s => s.Id == customer.CurrentVisitSPId).RemoveAbandonedCustomerFromQueue(customer, currentTime);
+                            _serviceProviders.First(s => s.Id == customer.CurrentVisitSPId).RemoveAbandonedCustomerFromQueue(customer, currentTime);
 
-                            //customer.AbandonCurrentServiceProvider();
+                            customer.AbandonCurrentServiceProvider();
                             
                             SMPLWrapper.schedule(1, _Ta, cToken);
 
