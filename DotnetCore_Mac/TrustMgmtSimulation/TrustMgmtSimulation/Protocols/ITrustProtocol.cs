@@ -6,6 +6,6 @@ namespace TrustMgmtSimulation.Protocols
     public interface ITrustProtocol
     {
         double RiskFactor { get; }
-        (Provider selectedProvider, List<Witness> witnesses, double selectedProviderActualWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime);
+        (Provider selectedProvider, List<Witness> witnesses, double selectedProviderActualWaitTime, double selectedProviderAdvertisedWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime);
     }
 }

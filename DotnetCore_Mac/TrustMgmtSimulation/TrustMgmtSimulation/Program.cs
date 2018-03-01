@@ -326,8 +326,8 @@ namespace TrustMgmtSimulation
         private static void SummarizeSimulationConfig()
         {
             Console.WriteLine("Simulation configuration:");
-            Console.WriteLine(String.Format("\tReport (figure) #: {0}\n\tDecision Policy: {1}\n\tMaliciousness % (P_m): {2}\n\tTotal Simulation Time (hrs): {3:0.00}\n\tRisk Factor (R_f): {4:0.00}\n\n",
-                                            reportNumber, decisionPolicy.ToString(), maliciousPercent, totalExecutionTime, riskFactor));
+            Console.WriteLine(String.Format("\tReport (figure) #: {0}\n\tTrust Protocol: {1}\n\tDecision Policy: {2}\n\tMaliciousness % (P_m): {3}\n\tTotal Simulation Time (hrs): {4:0.00}\n\tRisk Factor (R_f): {5:0.00}\n\n",
+                                            reportNumber, trustProtocol.ToString(), decisionPolicy.ToString(), maliciousPercent, totalExecutionTime, riskFactor));
         } 
     }
 }

@@ -136,7 +136,7 @@ namespace TrustMgmtSimulation
 
             //initialize customers
             initializeCustomers(_customerCount, _maliciousPercent, _Ta);
-            /*
+            
             int cToken = -1, simEvent = -1;
             
             while(SMPLWrapper.time() < totalExecutionTime)
@@ -159,7 +159,7 @@ namespace TrustMgmtSimulation
                     // otherwise, the customer has just arrived and has not yet selected a SP for service
                     if(!customer.IsCurrentProviderSelected)// the customer has just arrived and has not selected a SP for service
                     {
-                        var (selectedSP, witnessList, selectedSPAdvWT, selectedSPPrjWT) = _trustProtocol.DetermineMostEligibleProvider(_serviceProviders, currentTime);
+                        var (selectedSP, witnessList, selectedSPActualWT, selectedSPAdvWT, selectedSPPrjWT) = _trustProtocol.DetermineMostEligibleProvider(_serviceProviders, currentTime);
 
                         //TODO: If projected wait time is over a threshold then reschedule the customer for another visit
                         //      because there are no service providers available at this time
@@ -167,14 +167,21 @@ namespace TrustMgmtSimulation
                         {
                             //schedule customer for new arrival
                             SMPLWrapper.schedule(1, _Ta, cToken);
+                            break;
                         }
                         else
                         {
                             //initialize the current visit for the customer
-                            customer.InstantiateCurrentVisit(selectedSP, witnessList, selectedSPAdvWT, selectedSPPrjWT, currentTime);
+
+                            //determine a random service length but make sure the service time in non-zero
+                            double serviceLength = SMPLWrapper.expntl(_Ts);
+                            while(serviceLength == 0.0)
+                                serviceLength = SMPLWrapper.expntl(_Ts);
+
+                            customer.InstantiateCurrentVisit(selectedSP, witnessList, selectedSPAdvWT, selectedSPPrjWT, currentTime, serviceLength);
 
                             //update the service provider queue
-                            selectedSP.AddCustomerToQueue(customer, currentTime);
+                            //selectedSP.AddCustomerToServiceQueue(customer, currentTime);
                         }
                     }
                     else
@@ -184,30 +191,35 @@ namespace TrustMgmtSimulation
                         //wasted too much time waiting for a service that was falsely advertised.
                         if((currentTime - customer.CurrentVisitQueueTime) > _waitTimeThreshold)
                         {
-                            _serviceProviders.First(s => s.Id == customer.CurrentVisitSPId).RemoveAbandonedCustomerFromQueue(customer, currentTime);
+                            //_serviceProviders.First(s => s.Id == customer.CurrentVisitSPId).RemoveAbandonedCustomerFromQueue(customer, currentTime);
 
-                            customer.AbandonCurrentServiceProvider();
+                            //customer.AbandonCurrentServiceProvider();
                             
                             SMPLWrapper.schedule(1, _Ta, cToken);
-                        }
-                        else
-                        {
-                            //attempt service request from the SP
-                            if(SMPLWrapper.request(customer.CurrentVisitSPId, cToken, 0) == 0)
-                            {
-                                //the server request was success
 
-                                //set the customer current visit service time
-                                customer.SetCurrentVisitServiceStartTime(currentTime);
-
-                                SMPLWrapper.schedule(3, _Ts, cToken);
-                            }
+                            break;
                         }
                     }
+                    //attempt service request from the SP
+                    if(SMPLWrapper.request(customer.CurrentVisitSPId, cToken, 0) == 0)
+                    {
+                        //the server request was success
+
+                        //set the customer current visit service time
+                        customer.SetCurrentVisitServiceStartTime(currentTime);
+
+                        SMPLWrapper.schedule(3, _Ts, cToken);
+                    }
+                    break;
+                    case 3: //release server and depart
+                    SMPLWrapper.release(customer.CurrentVisitSPId, cToken);
+                    SMPLWrapper.schedule(1, SMPLWrapper.expntl(_Ta), cToken);
+                    //TODO: cleanup service request before leaving
                     break;
                 }
             }
-            */
+            
+            SMPLWrapper.report();
         }
     }
 }

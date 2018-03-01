@@ -11,7 +11,7 @@ namespace TrustMgmtSimulation.Protocols
 
         }
         
-        public override (Provider selectedProvider, List<Witness> witnesses, double selectedProviderActualWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime)
+        public override (Provider selectedProvider, List<Witness> witnesses, double selectedProviderActualWaitTime, double selectedProviderAdvertisedWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime)
         {
             if(providerList == null || providerList.Count < 1)
             {
@@ -35,13 +35,18 @@ namespace TrustMgmtSimulation.Protocols
                     leastBusyProviders.Add(providerList[i]);
                 }
             }
-            if(leastBusyProviders.Count == 0)
+            if(leastBusyProviders.Count <= 1)
             {
-                return (leastBusyProviders[0], null, selectedProviderAdvWaitTime, selectedProviderAdvWaitTime);
+                //if there are no providers then this will crash which should never happen :) 
+
+                //Since there is no trust, the advertised and projected wait time will be the same
+                return (leastBusyProviders[0], null, leastBusyProviders[0].GetCurrentActualWaitTime(currentTime),  selectedProviderAdvWaitTime, selectedProviderAdvWaitTime);
             }
             else
             {
-                return(leastBusyProviders[SMPLWrapper.random(0, leastBusyProviders.Count - 1)], null, selectedProviderAdvWaitTime, selectedProviderAdvWaitTime);
+                var randomlySelectedLeastBusyProvider = leastBusyProviders[SMPLWrapper.random(0, leastBusyProviders.Count - 1)];
+                //Since there is no trust, the advertised and projected wait time will be the same
+                return(randomlySelectedLeastBusyProvider, null, randomlySelectedLeastBusyProvider.GetCurrentActualWaitTime(currentTime), selectedProviderAdvWaitTime, selectedProviderAdvWaitTime);
             }
         }
     }

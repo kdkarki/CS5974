@@ -14,7 +14,7 @@ namespace TrustMgmtSimulation.Entities
 
         public double NextAvailTime { get; private set; }
 
-        private double[] QueueSlots { get; set; }
+        private double[] ServiceSlots { get; set; }
 
         public Provider(int id, bool isMalicious, int queueLength)
         {
@@ -23,11 +23,16 @@ namespace TrustMgmtSimulation.Entities
             this.TrustScore = 0.5;//initial trust score should be 50%
             this.TotalVisitors = 0;
             this.NextAvailTime = 0.0;
-            this.QueueSlots = new double[queueLength];
+            this.ServiceSlots = new double[queueLength];
             for(int aSlot = 0; aSlot < queueLength; aSlot++)
             {
-                QueueSlots[aSlot] = 0.0;
+                ServiceSlots[aSlot] = 0.0;
             }      
+        }
+
+        public double GetCurrentActualWaitTime(double currentTime)
+        {
+            return (NextAvailTime - currentTime);
         }
 
         public double GetCurrentAdvertisedWaitTime(double currentTime, double riskFactor)
@@ -36,7 +41,7 @@ namespace TrustMgmtSimulation.Entities
             if(this.IsMalicious)
                 waitTimeMultiplier = (1.0 - riskFactor);
             
-            advertisedWaitTime = waitTimeMultiplier * (NextAvailTime - currentTime);
+            advertisedWaitTime = waitTimeMultiplier * GetCurrentActualWaitTime(currentTime);
 
             if(advertisedWaitTime < 0.0167)
             {
@@ -46,11 +51,14 @@ namespace TrustMgmtSimulation.Entities
             return advertisedWaitTime;
         }
 
-        public void AddCustomerToQueue(Customer customer, double CurrentTime)
+        public void AddCustomerToServiceQueue(Customer customer, double currentTime)
         {
             if(customer == null)
                 throw new System.ArgumentNullException("Null Customer cannot be added to service provider queue");
-            throw new System.NotImplementedException();
+            if(customer.CurrentVisitServiceLength == 0.0)
+                throw new System.ArgumentNullException("Customer sservice length cannot be 0.0");
+
+            throw new System.NotImplementedException("When a customer selects a service provider then the customer needs to be added to the provider's service queue.");
         }
 
         public void RemoveAbandonedCustomerFromQueue(Customer customer, double currentTime)

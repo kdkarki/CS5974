@@ -10,9 +10,9 @@ namespace TrustMgmtSimulation.Protocols
 
         }
         
-        public override (Provider selectedProvider, List<Witness> witnesses, double selectedProviderActualWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime)
+        public override (Provider selectedProvider, List<Witness> witnesses, double selectedProviderActualWaitTime, double selectedProviderAdvertisedWaitTime, double selectedProviderProjectedWaitTime) DetermineMostEligibleProvider(List<Provider> providerList, double currentTime)
         {            
-            return (null, null, 0.0, 0.0);
+            return (null, null, 0.0, 0.0, 0.0);
         }
     }
 }

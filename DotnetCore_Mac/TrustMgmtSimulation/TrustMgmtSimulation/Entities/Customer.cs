@@ -12,35 +12,20 @@ namespace TrustMgmtSimulation.Entities
         /// </summary>
         public class CurrentProviderVisit : Visit
         {
-            public CurrentProviderVisit()
+            public CurrentProviderVisit() : base()
             {
-                this.SelectedProvider = null;
-                this.ActualWaitTime = -1.0;
-                this.AdvertisedWaitTime = -1.0;
-                this.ProjectedWaitTime = 1.0;
-                this.QueueStartTime = -1.0;
-                this.ServiceStartTime = -1.0;
-            }
-            public void Reset()
-            {
-                this.SelectedProvider = null;
-                this.ActualWaitTime = -1.0;
-                this.AdvertisedWaitTime = -1.0;
-                this.ProjectedWaitTime = 1.0;
-                this.QueueStartTime = -1.0;
-                this.ServiceStartTime = -1.0;
+                
             }
 
-            public void SetServiceStartTime(double serviceStartTime)
+            public CurrentProviderVisit(Provider provider, double advWaitTime, double prjWaitTime, double qStarTime, double servStartTime, double serviceLength, List<Witness> witnesses = null)
+                : base(provider, advWaitTime, prjWaitTime, qStarTime, servStartTime, serviceLength, witnesses)
             {
-                this.ServiceStartTime = serviceStartTime;
-                this.ActualWaitTime = this.ServiceStartTime - this.QueueStartTime;
             }
 
-            public Visit GetVisit()
+            /* public Visit GetVisit()
             {
                 return new Visit(SelectedProvider, AdvertisedWaitTime, ProjectedWaitTime, QueueStartTime, ServiceStartTime);
-            }
+            } */
             
         }
 
@@ -56,7 +41,7 @@ namespace TrustMgmtSimulation.Entities
             
         #endregion
 
-        private CurrentProviderVisit currentVisit = new CurrentProviderVisit();
+        private CurrentProviderVisit currentVisit;
 
         public int Id { get; private set; }
         
@@ -66,7 +51,7 @@ namespace TrustMgmtSimulation.Entities
         {
             get
             {
-                if(currentVisit.SelectedProvider == null)
+                if(currentVisit == null || currentVisit.SelectedProvider == null)
                     throw new NullReferenceException($"There is no current service provider for customer: {this.Id}.");
                 return currentVisit.SelectedProvider.Id;
             }
@@ -76,13 +61,24 @@ namespace TrustMgmtSimulation.Entities
         {
             get
             {
-                if(currentVisit.SelectedProvider == null)
+                if(currentVisit == null || currentVisit.SelectedProvider == null)
                     throw new NullReferenceException($"There is no current service provider for customer: {this.Id}.");
                 return currentVisit.QueueStartTime;
             }
         }
 
-        public bool IsCurrentProviderSelected => this.currentVisit.SelectedProvider != null;
+        public double CurrentVisitServiceLength
+        {
+            get
+            {
+                if(currentVisit == null)
+                    throw new NullReferenceException($"Current visit is null");
+                
+                return currentVisit.ServiceLength;
+            }
+        }
+
+        public bool IsCurrentProviderSelected => this.currentVisit != null && this.currentVisit.SelectedProvider != null;
 
         public List<Visit> VisitHistory { get; set; }
 
@@ -93,16 +89,11 @@ namespace TrustMgmtSimulation.Entities
             this.VisitHistory = new List<Visit>();
         }
 
-        public void InstantiateCurrentVisit(Provider selectedProvider, List<Witness> witnessList, double advertisedWaitTime, double projectedWaitTime, double queueStartTime)
+        public void InstantiateCurrentVisit(Provider selectedProvider, List<Witness> witnessList, double advertisedWaitTime, double projectedWaitTime, double queueStartTime, double serviceLength)
         {
-            currentVisit.SelectedProvider = selectedProvider;
-            currentVisit.AdvertisedWaitTime = advertisedWaitTime;
-            currentVisit.ProjectedWaitTime = projectedWaitTime;
-            currentVisit.QueueStartTime = queueStartTime;
+            currentVisit = new CurrentProviderVisit(selectedProvider, advertisedWaitTime, projectedWaitTime, queueStartTime, -1.0, serviceLength, witnessList);            
 
-            //TODO: Need to implement witness 
-            //      Need to add current visit to visit history
-            throw new System.NotImplementedException();
+            VisitHistory.Insert(0,currentVisit);
         }
 
         public void SetCurrentVisitServiceStartTime(double serviceStartTime)
@@ -113,6 +104,7 @@ namespace TrustMgmtSimulation.Entities
             this.currentVisit.SetServiceStartTime(serviceStartTime);
 
             //TODO: Need to rate/provide feedback to service provider and witnesses
+            throw new NotImplementedException("Need to rate/provide feedback to service provider and witnesses");
         }
 
         public void AbandonCurrentServiceProvider()
