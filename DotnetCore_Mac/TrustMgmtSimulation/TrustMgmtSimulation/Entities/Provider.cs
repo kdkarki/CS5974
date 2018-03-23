@@ -14,7 +14,7 @@ namespace TrustMgmtSimulation.Entities
 
         public double NextAvailTime { get; private set; }
 
-        private double[] ServiceSlots { get; set; }
+        private ServiceUnit[] ServiceSlots { get; set; }
 
         public Provider(int id, bool isMalicious, int queueLength)
         {
@@ -23,10 +23,10 @@ namespace TrustMgmtSimulation.Entities
             this.TrustScore = 0.5;//initial trust score should be 50%
             this.TotalVisitors = 0;
             this.NextAvailTime = 0.0;
-            this.ServiceSlots = new double[queueLength];
+            this.ServiceSlots = new ServiceUnit[queueLength];
             for(int aSlot = 0; aSlot < queueLength; aSlot++)
             {
-                ServiceSlots[aSlot] = 0.0;
+                ServiceSlots[aSlot] = new ServiceUnit();
             }      
         }
 
